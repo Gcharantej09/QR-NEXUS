@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents Details Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #ddd;
+            text-align: left;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #6a11cb;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+        }
+
+        button:hover {
+            background-color: #5a09b7;
+            transform: scale(1.05);
+        }
+
+        #qrcode {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                padding: 20px;
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Traffic Details Form</h2>
+        <form id="trafficForm">
+            <div class="form-group">
+                <label for="dlNumber">Driving License Number</label>
+                <input type="text" id="dlNumber" name="dlNumber" placeholder="Enter Driving License Number"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="rcNumber">Vehicle Registration Number</label>
+                <input type="text" id="rcNumber" name="rcNumber" placeholder="Enter Vehicle Registration Number"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="pollutionNumber">Pollution Certificate Number</label>
+                <input type="text" id="pollutionNumber" name="pollutionNumber"
+                    placeholder="Enter Pollution Certificate Number" required>
+            </div>
+            <div class="form-group">
+                <label for="emailPhone">Phone Number</label>
+                <input type="text" id="emailPhone" name="emailPhone" placeholder="Enter Email or Phone Number"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="fileUpload">Upload Document</label>
+                <input type="file" id="fileUpload" name="fileUpload">
+            </div>
+            <button type="button" onclick="submitForm()">Submit Details</button>
+        </form>
+        <div id="qrcode"></div>
+    </div>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",
+            authDomain: "qr-nexus-81938.firebaseapp.com",
+            databaseURL: "https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "qr-nexus-81938",
+            storageBucket: "qr-nexus-81938.firebasestorage.app",
+            messagingSenderId: "597878562208",
+            appId: "1:597878562208:web:acaac02de0078f86e018c5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+        const encryptionKey = '66MXNJUNXTH'; //do not change this!!
+
+        function generateUniqueId() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        async function uploadFileToHosting(file) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                fetch('upload.php', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log('Upload response:', data);
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        console.error('Upload error:', error);
+                        reject(error);
+                    });
+            });
+        }
+
+        function encryptData(data, key) {
+            try {
+                const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), key).toString();
+                return encrypted;
+            } catch (e) {
+                console.error("Encryption error:", e);
+                return null;
+            }
+        }
+
+        async function submitForm() {
+            const dlNumber = document.getElementById('dlNumber').value;
+            const rcNumber = document.getElementById('rcNumber').value;
+            const pollutionNumber = document.getElementById('pollutionNumber').value;
+            const emailPhone = document.getElementById('emailPhone').value;
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
+
+            if (!dlNumber || !rcNumber || !pollutionNumber || !emailPhone) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            let fileUrl = null;
+            if (file) {
+                try {
+                    fileUrl = await uploadFileToHosting(file);
+                } catch (error) {
+
+                    console.error("File upload failed:", error);
+                    alert('File upload failed. Please try again.');
+                    return;
+                }
+            }
+
+            auth.onAuthStateChanged(async function (user) {
+                if (user) {
+                    var userId = user.uid;
+                    const uniqueId = generateUniqueId();
+                    const trafficData = {
+                        dlNumber: dlNumber,
+                        rcNumber: rcNumber,
+                        pollutionNumber: pollutionNumber,
+                        emailPhone: emailPhone,
+                        fileUrl: fileUrl || null
+                    };
+                    const trafficDataRef = db.ref(`users/${userId}/trafficdata/${uniqueId}`);
+
+                    trafficDataRef.set(trafficData).then(() => {
+                        alert('Details submitted successfully!');
+                        document.getElementById("trafficForm").reset();
+
+                        const encryptedData = encryptData(trafficData, encryptionKey);
+
+                        if (encryptedData) {
+                            const lastQrCodeRef = db.ref(`users/${userId}/lastQrCodeData`);
+                            lastQrCodeRef.set(encryptedData)
+                                .then(() => {
+                                    console.log("Successfully stored encrypted QR data to firebase");
+                                    window.location.href = 'qrcode.html';
+                                })
+                                .catch((error) => {
+                                    console.error("Error saving last QR code data: ", error);
+                                    alert('Failed to save QR code data. Please try again.');
+                                });
+
+
+                        } else {
+                            alert('Failed to encrypt data.');
+                        }
+                    }).catch((error) => {
+                        console.error("Error writing data to Firebase: ", error);
+                        alert('Failed to submit details. Please try again.');
+                    });
+                } else {
+                    alert('No user is signed in. Please sign in before submitting the form.');
+                }
+            });
+        }
+
+        function generateQRCode(data) {
+            const qrcodeDiv = document.getElementById('qrcode');
+            qrcodeDiv.innerHTML = "";
+            new QRCode(qrcodeDiv, {
+                text: data,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+        //spidyyyyy
+    </script>
+</body>
+
+</html>

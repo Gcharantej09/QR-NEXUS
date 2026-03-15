@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Nexus - DASHBOARD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            text-align: center;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            position: relative;
+        }
+
+        .left-panel h1 {
+            font-size: 2.5rem;
+        }
+
+        .left-panel p {
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+        .left-panel img {
+            width: 70%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+
+        .right-panel {
+            flex: 1.2;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: white;
+            color: #333;
+        }
+
+        .right-panel h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .new-button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .new-button {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 7px rgba(0, 0, 0, 0.3);
+            width: 250px;
+        }
+
+        .new-button:hover {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .new-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+       
+        #drawer {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #drawer a {
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #ddd;
+            display: block;
+            transition: 0.3s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #drawer a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        #drawer .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+            color: white;
+            cursor: pointer;
+        }
+
+        #main {
+            transition: margin-left .5s;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 10px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 2;
+        }
+
+        .hamburger div {
+            width: 30px;
+            height: 3px;
+            background: white;
+            transition: 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="drawer" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeDrawer()">&times;</a>
+        <a href="profile.html">My Profile</a>
+        <a href="aboutus.html">About Us</a>
+        <a href="contactus.html">Contact Us</a>
+    </div>
+    
+    <div id="main">
+        <div class="container">
+            <div class="left-panel">
+                <button class="hamburger" id="hamburger" onclick="openDrawer(event)">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </button>
+                <h1>QR NEXUS System</h1>
+                <p>Your gateway to traffic document management.</p>
+                <img src="https://assets.onecompiler.app/438fn5wds/438fj6nqq/Adobe%20Express%20-%20file.png"
+                    alt="QR Code Illustration">
+            </div>
+            <div class="right-panel">
+                <h2>Dashboard</h2>
+                <div class="new-button-container">
+                    <button class="new-button" onclick="redirectToDetailsPage()">Get QR Code</button>
+                    <button class="new-button" onclick="myQRCode()">My QR Code</button>
+                    <button class="new-button" onclick="shareQRCode()">Share QR Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openDrawer(event) {
+            event.stopPropagation();
+            document.getElementById("drawer").style.width = "250px";
+            document.getElementById("main").style.marginLeft = "250px";
+        }
+
+        function closeDrawer() {
+            document.getElementById("drawer").style.width = "0";
+            document.getElementById("main").style.marginLeft = "0";
+        }
+        document.addEventListener("click", function (event) {
+            var drawer = document.getElementById("drawer");
+            var hamburger = document.getElementById("hamburger");
+            if (!drawer.contains(event.target) && !hamburger.contains(event.target)) {
+                closeDrawer();
+            }
+        });
+
+        function redirectToDetailsPage() {
+            window.location.href = "getqr.html";
+        }
+
+        function myQRCode() {
+            window.location.href = "qrcode.html";
+        }
+
+        function shareQRCode() {
+            window.location.href = "share.html";
+        }
+        //spidyyyyy
+    </script>
+</body>
+
+</html>

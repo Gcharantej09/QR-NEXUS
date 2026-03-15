@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - QR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            padding: 2rem;
+            text-align: center;
+            border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width:768px) {
+            .grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(200px, auto));
+            }
+        }
+
+        .header {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen p-10">
+        <div class="header mb-8">
+            <h1 class="text-4xl font-bold text-center">Admin Dashboard</h1>
+            <p class="text-center text-lg mt-2">Manage your QR Nexus System efficiently</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card" onclick="navigateTo('qr_code_scanner.html')">
+                <svg class="mx-auto mb-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h3a1 1 0 110 2H5v2a1 1 0 11-2 0V5a1 1 0 011-1zM4 15a1 1 0 011 1v3a1 1 0 001 1h2a1 1 0 110 2H5a1 1 0 01-1-1v-4a1 1 0 011-1zm16-11a1 1 0 011 1v4a1 1 0 01-1 1h-2a1 1 0 110-2h2V5a1
+                    . . .
+                    -11z"/>
+                </svg>
+                <h2 class="text-xl font-semibold">QR Code Scanner</h2>
+                <p class="text-gray-300 mt-2">Scan and manage QR codes effortlessly.</p>
+            </div>
+
+            <div class="card" onclick="navigateTo('docuverification.html')">
+                <svg class="mx-auto mb-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 -24.00 -24.00 -24.00" stroke="currentColor" width="48" height="48">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 -7a4 -7 -7 -7 -7z"/>
+                </svg>
+                <h2 class="text-xl font-semibold">Document Verification</h2>
+                <p class="text-gray-300 mt-2">Verify documents quickly and securely.</p>
+            </div>
+
+            <div class="card" onclick="navigateTo('settings.html')">
+                <svg class="mx-auto mb-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-24.00 -24.00 -24.00 -24.00" stroke-width=".25rem">
+                    <path stroke-linecap='round' d='M12 .75c-.75-.75-.75-.75-.75-.75s-.75-.75-.75-.75s-.75-.75-.75-.75s-.75-.75-.75-.75'/>
+                </svg>
+                <h2 class="text-xl font-semibold">Settings</h2>
+                <p class="text-gray-300 mt-2">Customize your application settings.</p>
+             </div>
+         </div>
+     </div>
+
+     <script>
+         function navigateTo(page) {
+             window.location.href = page;
+         }
+         //spidyyyyy
+     </script>
+</body>
+</html>

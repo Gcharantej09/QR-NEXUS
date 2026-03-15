@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - QR Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .left-panel h1 {
+            font-size: 2.5rem;
+        }
+
+        .left-panel p {
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+        .left-panel img {
+            width: 70%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+
+        .right-panel {
+            flex: 1.2;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background-color: white;
+            color: #333;
+            overflow-y: auto;
+        }
+
+        .right-panel h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .content {
+            font-size: 1rem;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .content p {
+            margin-bottom: 15px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .button-container a {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+        }
+
+        .button-container a:hover {
+            background-color: #5a09b7;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: auto;
+            }
+
+            .left-panel,
+            .right-panel {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .left-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>QR NEXUS System</h1>
+            <p>Learn more about our mission.</p>
+            <img src="https://assets.onecompiler.app/438fn5wds/438fj6nqq/Adobe%20Express%20-%20file.png"
+                alt="QR Code Illustration">
+        </div>
+        <div class="right-panel">
+            <h2>About QR Nexus</h2>
+            <div class="content">
+                <p>QR Nexus is dedicated to revolutionizing document management for traffic systems through innovative
+                    QR code technology.</p>
+
+                <p>Our mission is to streamline processes, enhance efficiency, and improve overall traffic management
+                    by providing secure and accessible document solutions.</p>
+
+                <p>We strive to create a seamless experience for both administrators and users, ensuring quick access
+                    to essential documents and information.</p>
+
+                <p>Thank you for choosing QR Nexus. We are excited to partner with you in revolutionizing document
+                    management for traffic systems.</p>
+
+                <div class="button-container">
+                    <a href="userhome.html">Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<!--//spidyyyyy-->

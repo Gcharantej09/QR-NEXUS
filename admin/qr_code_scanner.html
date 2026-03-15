@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Details</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        #scanner-container video {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        #result h3 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #result p {
+            font-size: 1rem;
+            color: #eee;
+            margin-bottom: 8px;
+        }
+
+        #result img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                padding: 20px;
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>QR Code Scanner</h2>
+        <div id="scanner-container">
+            <video id="scanner-video"></video>
+        </div>
+        <div id="result" style="display: none;">
+            <h3>Traffic Details</h3>
+            <p><strong>Driving License Number:</strong> <span id="dlNumber"></span></p>
+            <p><strong>Vehicle Registration Number:</strong> <span id="rcNumber"></span></p>
+            <p><strong>Pollution Certificate Number:</strong> <span id="pollutionNumber"></span></p>
+            <p><strong>Email or Phone Number:</strong> <span id="emailPhone"></span></p>
+            <img id="fileUrl" src="" alt="Uploaded Document">
+        </div>
+    </div>
+    <script src="https://cdn.rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        const encryptionKey = '66MXNJUNXTH';//do not change this!!
+
+        function decryptData(encryptedData, key) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(encryptedData, key);
+                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                return JSON.parse(decrypted);
+            } catch (e) {
+                console.error("Decryption error:", e);
+                return null;
+            }
+        }
+
+        let scanner = new Instascan.Scanner({
+            video: document.getElementById('scanner-video'),
+            mirror: false
+        });
+
+        Instascan.Camera.getCameras().then(function (cameras) {
+    if (cameras.length > 0) {
+        let backCamera = cameras.find(camera => camera.name.toLowerCase().includes('back') || camera.id.toLowerCase().includes('back'));
+        if (backCamera) {
+            scanner.start(backCamera);
+        } else {
+            alert('Back camera not found. Defaulting to first available camera.');
+            scanner.start(cameras[0]);
+        }
+    } else {
+        alert('No cameras found.');
+    }
+}).catch(function (e) {
+    console.error(e);
+    alert('Error accessing camera.');
+});
+
+
+         scanner.addListener('scan', function (content) {
+             console.log("Scanned content:", content);
+             displayData(content);
+         });
+
+         function displayData(encryptedData) {
+             try {
+                 const decryptedData = decryptData(encryptedData, encryptionKey);
+                 if (decryptedData) {
+                     document.getElementById('dlNumber').textContent = decryptedData.dlNumber;
+                     document.getElementById('rcNumber').textContent = decryptedData.rcNumber;
+                     document.getElementById('pollutionNumber').textContent = decryptedData.pollutionNumber;
+                     document.getElementById('emailPhone').textContent = decryptedData.emailPhone;
+                     document.getElementById('fileUrl').src = decryptedData.fileUrl || '';
+
+                     document.getElementById('result').style.display = 'block';
+                 } else {
+                     alert("Unable to decrypt data or invalid QR code.");
+                 }
+             } catch (e) {
+                 console.error("Error processing scanned data:", e);
+                 alert("Error displaying data.");
+             }
+         }
+         //spidyyyyy
+     </script>
+</body>
+
+</html>
