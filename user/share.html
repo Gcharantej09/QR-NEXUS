@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -116,4 +117,187 @@ function copyLink(){
 }
 </script>
 </body>
+=======
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share QR Code</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        #qrcode {
+            margin: 20px auto;
+        }
+
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .share-button {
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .share-button:hover {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            transform: scale(1.05);
+        }
+
+        #backButton {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        #backButton:hover {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Share Your QR Code</h2>
+        <div id="qrcode"></div>
+        <div class="share-buttons">
+            <button class="share-button" onclick="shareQRCode('whatsapp')">Share on WhatsApp</button>
+            <button class="share-button" onclick="shareQRCode('facebook')">Share on Facebook</button>
+            <button class="share-button" onclick="shareQRCode('twitter')">Share on Twitter</button>
+        </div>
+        <a id="backButton" href="userhome.html">Back to Home</a>
+    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",
+            authDomain: "qr-nexus-81938.firebaseapp.com",
+            databaseURL: "https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "qr-nexus-81938",
+            storageBucket: "qr-nexus-81938.firebasestorage.app",
+            messagingSenderId: "597878562208",
+            appId: "1:597878562208:web:acaac02de0078f86e018c5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        function getUniqueIdFromLocalStorage() {
+            return localStorage.getItem('trafficDataUniqueId');
+        }
+
+        function generateQRCode(text) {
+            const qrcodeDiv = document.getElementById("qrcode");
+            qrcodeDiv.innerHTML = "";
+
+            const qrcode = new QRCode(qrcodeDiv, {
+                text: text,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function fetchTrafficDetails() {
+            auth.onAuthStateChanged(function (user) {
+                if (user) {
+                    var userId = user.uid;
+                    const uniqueId = getUniqueIdFromLocalStorage();
+                    if (uniqueId) {
+                        const shareableLink = `https://qr-nexus-81938.web.app/qrcode.html?uniqueId=${uniqueId}`;
+                        generateQRCode(shareableLink);
+                    } else {
+                        document.getElementById("qrcode").innerHTML = "No QR code to share.";
+                    }
+                } else {
+                    alert('No user is signed in. Please sign in before accessing this page.');
+                    window.location.href = 'loginpage.html';
+                }
+            });
+        }
+
+        function shareQRCode(platform) {
+            const uniqueId = getUniqueIdFromLocalStorage();
+            if (uniqueId) {
+                let shareURL = "";
+                let text = "Check out my traffic details QR code!";
+                const shareableLink = `https://yourdomain.com/qrcode.html?uniqueId=${uniqueId}`;
+                switch (platform) {
+                    case 'whatsapp':
+                        shareURL = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " +
+                            shareableLink)}`;
+                        break;
+                    case 'facebook':
+                        shareURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareableLink)}`;
+                        break;
+                    case 'twitter':
+                        shareURL = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareableLink)}`;
+                        break;
+                    default:
+                        alert('Invalid platform.');
+                        return;
+                }
+                window.open(shareURL, '_blank');
+            } else {
+                alert('No QR code to share. Please generate a QR code first.');
+            }
+        }
+
+        window.onload = function () {
+            fetchTrafficDetails();
+        };
+        //spidyyyyy
+    </script>
+</body>
+
+>>>>>>> 10c438e489ec90a52470727b8928fb89e0f54d98
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -435,4 +436,478 @@ function togglePw(){
 }
 </script>
 </body>
+=======
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR NEXUS System - Login</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"
+        crossorigin="anonymous"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .left-panel h1 {
+            font-size: 2.5rem;
+        }
+
+        .left-panel p {
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+        .left-panel img {
+            width: 70%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+
+        .right-panel {
+            flex: 1.2;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: white;
+            color: #333;
+        }
+
+        .right-panel h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tabs button {
+            padding: 10px 25px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+            transition: background-color .3s ease;
+            font-weight: bold;
+        }
+
+        .tabs button:hover {
+            background-color: #ddd;
+        }
+
+        .tabs button.active {
+            background-color: #6a11cb;
+            color: white;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        form label {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        form input {
+            width: 80%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            transition: border-color ease-in-out .3s;
+        }
+
+        form input:hover,
+        form input:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+
+        .password-wrapper {
+            position: relative;
+            width: 80%;
+        }
+
+        .password-wrapper i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .button-container {
+            display: flex;
+            width: 80%;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .button-container button,
+        .button-container a {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 1rem;
+            width: 45%;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+        }
+
+        .register-btn {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+        }
+
+        .login-btn:hover,
+        .register-btn:hover {
+            background-color: #5a09b7;
+            transform: scale(1.05);
+        }
+
+        .or-separator {
+            margin: 0 5px;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 0.9rem;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            visibility: hidden;
+            background-color: #ffcdd2;
+            border-left: 4px solid #d32f2f;
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 80%;
+            text-align: left;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .error-message.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .honeypot {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: auto;
+                padding-bottom: 20px;
+            }
+
+            .left-panel,
+            .right-panel {
+                width: 100%;
+                padding: 20px;
+                text-align: center;
+            }
+
+            form input,
+            .button-container button,
+            .button-container a {
+                width: 90%;
+                margin-bottom: 10px;
+            }
+
+            .button-container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .button-container button,
+            .button-container a {
+                width: 45%;
+            }
+
+            .or-separator {
+                display: inline;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>Welcome to <span>QR NEXUS System</span></h1>
+            <p>Revolutionizing document management for traffic systems.</p>
+            <img src="https://assets.onecompiler.app/438fn5wds/438fj6nqq/Adobe%20Express%20-%20file.png"
+                alt="QR Code Illustration">
+        </div>
+
+        <div class="right-panel">
+            <h2>Login</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('user', event)">User</button>
+                <button class="tab-btn" onclick="switchTab('admin', event)">Officer</button>
+            </div>
+
+            <form id="loginForm">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+                <span class="error-message" id="email-error">Please enter your email.</span>
+
+                <label for="password">Password:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <i class="fa fa-eye" onclick="togglePassword()"></i>
+                </div>
+                <span class="error-message" id="password-error">Please enter your password.</span>
+
+                <label class="honeypot">Leave this field blank:</label>
+                <input type="text" class="honeypot" name="honeypot">
+
+                <div class="button-container">
+                    <button type="button" class="register-btn" onclick="register()">Register</button>
+                    <span class="or-separator">or</span>
+                    <button type="button" class="login-btn" onclick="login()">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",
+            authDomain: "qr-nexus-81938.firebaseapp.com",
+            databaseURL: "https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "qr-nexus-81938",
+            storageBucket: "qr-nexus-81938.firebasestorage.app",
+            messagingSenderId: "597878562208",
+            appId: "1:597878562208:web:acaac02de0078f86e018c5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let isAdminLogin = false;
+
+        const adminEmails = [ "chintuvenkatreddy13@gmail.com", "gcharanyadav23@gmail.com"];
+
+        function login() {
+            let email = document.getElementById("email").value.trim();
+            let password = document.getElementById("password").value.trim();
+
+            let emailError = document.getElementById("email-error");
+            let passwordError = document.getElementById("password-error");
+
+            emailError.classList.remove("visible");
+            passwordError.classList.remove("visible");
+
+            let isValid = true;
+
+            if (email === "") {
+                emailError.textContent = "Please enter your email.";
+                emailError.classList.add("visible");
+                isValid = false;
+            }
+
+            if (password === "") {
+                passwordError.textContent = "Please enter your password.";
+                passwordError.classList.add("visible");
+                isValid = false;
+            }
+
+            if (isValid) {
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        if (!user.emailVerified) {
+                            alert("Please verify your email address before logging in.");
+                            auth.signOut();
+                            return;
+                        }
+
+                        const isAdmin = adminEmails.includes(email);
+
+                        if (isAdmin) {
+                            window.location.href = "admin/adminhome.html";
+                        } else {
+                            window.location.href = "user/userhome.html";
+                        }
+                    })
+                    .catch((error) => {
+                        let errorMessage = "Login failed: ";
+                        switch (error.code) {
+                            case 'auth/invalid-email':
+                                errorMessage = "Invalid email address.";
+                                break;
+                            case 'auth/user-disabled':
+                                errorMessage = "This user account has been disabled.";
+                                break;
+                            case 'auth/user-not-found':
+                                errorMessage = "User not found. Please register.";
+                                break;
+                            case 'auth/wrong-password':
+                                errorMessage = "Incorrect password.";
+                                break;
+                            default:
+                                errorMessage = error.message;
+                        }
+                        emailError.textContent = errorMessage;
+                        emailError.classList.add("visible");
+                        console.error("Login error:", error.code, error.message);
+                    });
+            }
+        }
+
+        function register() {
+            let email = document.getElementById("email").value.trim();
+            let password = document.getElementById("password").value.trim();
+            let honeypot = document.querySelector('input[name="honeypot"]').value;
+            let emailError = document.getElementById("email-error");
+            let passwordError = document.getElementById("password-error");
+
+            emailError.classList.remove("visible");
+            passwordError.classList.remove("visible");
+
+            if (honeypot) {
+                console.log("Bot detected!");
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                emailError.textContent = "Please enter a valid email address.";
+                emailError.classList.add("visible");
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("Registration successful:", user);
+
+                    user.sendEmailVerification()
+                        .then(() => {
+                            alert("Registration successful! Please check your email to verify your account.");
+                            auth.signOut();
+                        });
+
+                    db.ref('users/' + user.uid).set({
+                        email: email,
+                        isAdmin: adminEmails.includes(email)
+                    });
+                })
+                .catch((error) => {
+                    let errorMessage = "Registration failed: ";
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = "This email is already in use.";
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = "Invalid email address.";
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = "Password should be at least 6 characters.";
+                            break;
+                        default:
+                            errorMessage = error.message;
+                    }
+                    emailError.textContent = errorMessage;
+                    emailError.classList.add("visible");
+                    console.error("Registration error:", error.code, error.message);
+                });
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            const passwordIcon = document.querySelector(".password-wrapper i");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                passwordIcon.classList.remove("fa-eye");
+                passwordIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                passwordIcon.classList.remove("fa-eye-slash");
+                passwordIcon.classList.add("fa-eye");
+            }
+        }
+
+        function switchTab(role, event) {
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab) {
+                activeTab.classList.remove('active');
+            }
+            event.target.classList.add('active');
+        }
+        //spidyyyyy
+    </script>
+</body>
+
+>>>>>>> 10c438e489ec90a52470727b8928fb89e0f54d98
 </html>

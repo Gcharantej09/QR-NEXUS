@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -159,4 +160,197 @@ async function loadScore(uid){
 }
 </script>
 </body>
+=======
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - QR Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .left-panel h1 {
+            font-size: 2.5rem;
+        }
+
+        .left-panel p {
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+        .profileImageContainer {
+            width: 70%;
+            max-width: 300px;
+            height: 300px;
+            margin-top: 20px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .right-panel {
+            flex: 1.2;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background-color: white;
+            color: #333;
+            overflow-y: auto;
+        }
+
+        .right-panel h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .profileSection {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #profileDetails {
+            font-size: 1rem;
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #profileDetails p {
+            margin-bottom: 10px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .button-container a {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+        }
+
+        .button-container a:hover {
+            background-color: #5a09b7;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: auto;
+            }
+
+            .left-panel,
+            .right-panel {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .left-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>QR NEXUS System</h1>
+            
+        </div>
+        <div class="right-panel">
+            <h2>My Profile</h2>
+            <div class="profileSection">
+            </div>
+            <div id="profileDetails">
+                <p><strong>Email:</strong> <span id="email">Loading...</span></p>
+            </div>
+            <div class="button-container">
+                <a href="userhome.html">Home</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",
+            authDomain: "qr-nexus-81938.firebaseapp.com",
+            databaseURL: "https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "qr-nexus-81938",
+            storageBucket: "qr-nexus-81938.firebasestorage.app",
+            messagingSenderId: "597878562208",
+            appId: "1:597878562208:web:acaac02de0078f86e018c5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("email").textContent = user.email;
+            } else {
+                document.getElementById("email").textContent = "Not logged in";
+            }
+        });
+        //spidyyyyy
+    </script>
+</body>
+
+>>>>>>> 10c438e489ec90a52470727b8928fb89e0f54d98
 </html>
