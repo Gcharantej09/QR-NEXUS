@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate QR · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.form-card{background:#fff;border:1px solid var(--cit-line-2);border-radius:18px;padding:28px;margin:0 auto;max-width:600px;box-shadow:0 4px 16px rgba(0,0,0,0.05);}
+.form-card h2{font-size:1.5rem;margin-bottom:6px;display:flex;align-items:center;gap:8px;color:var(--cit-text);font-family:var(--font-display);}
+.form-card h2 i{color:var(--cit-saffron);}
+.form-card .sub{color:var(--cit-mute);font-size:0.88rem;margin-bottom:18px;}
+.section-block{background:var(--cit-bg-2);border:1px solid var(--cit-line-2);border-radius:12px;padding:18px;margin-bottom:14px;}
+.section-block h3{font-size:0.95rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--cit-text);font-family:var(--font-display);}
+.section-block h3 i{color:var(--cit-saffron);}
+.section-block h3 .step-num{width:24px;height:24px;border-radius:50%;background:var(--cit-saffron);color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.upload-zone{
+  border:2px dashed var(--cit-line-2);border-radius:12px;padding:24px;
+  text-align:center;background:#fff;cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+}
+.upload-zone:hover{border-color:var(--cit-saffron);background:#FFF8F0;}
+.upload-zone i{font-size:2rem;color:var(--cit-saffron);margin-bottom:8px;}
+.upload-zone p{color:var(--cit-mute);font-size:0.85rem;margin:0;}
+.upload-status{font-size:0.78rem;color:var(--cit-green);margin-top:6px;display:none;align-items:center;gap:4px;}
+.preview-card{background:linear-gradient(135deg,#FFF8E8,#FFF);border:1px solid rgba(255,107,0,0.30);border-radius:18px;padding:24px;margin-top:18px;text-align:center;}
+.preview-card h3{color:var(--cit-saffron);font-size:1.1rem;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+#previewQR canvas,#previewQR img{border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.10);}
+.preview-card p{color:var(--cit-mute);font-size:0.85rem;margin-top:10px;}
+
+.spinner-or{width:18px;height:18px;border:2.5px solid rgba(255,107,0,0.25);border-top-color:var(--cit-saffron);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-qrcode"></i> Generate QR Code</h2>
+        <div class="sub">Create your digital traffic document. Encrypted end-to-end — only authorized officers can read it.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="form-card">
+      <div class="section-block">
+        <h3><span class="step-num">1</span> Document Numbers</h3>
+        <div class="form-grid">
+          <div class="field"><label>Driving License Number</label>
+            <input class="input" type="text" id="dlNumber" placeholder="e.g. TS09 20240001234">
+          </div>
+          <div class="field"><label>Vehicle Registration Number</label>
+            <input class="input" type="text" id="rcNumber" placeholder="e.g. TS09AB1234">
+          </div>
+          <div class="field"><label>Pollution Certificate Number</label>
+            <input class="input" type="text" id="pollutionNumber" placeholder="PUC certificate number">
+          </div>
+          <div class="field"><label>Phone Number</label>
+            <input class="input" type="text" id="phoneNumber" placeholder="10-digit mobile number">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3><span class="step-num">2</span> Document Upload <span style="font-size:0.7rem;color:var(--cit-mute);font-weight:500;margin-left:6px;">(optional)</span></h3>
+        <label class="upload-zone" for="fileUpload">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <p>Click to choose — JPG, PNG or PDF (max 5 MB)</p>
+        </label>
+        <input type="file" id="fileUpload" accept="image/*,.pdf" style="display:none;" onchange="onFileChosen()">
+        <div class="upload-status" id="uploadStatus"><i class="fa-solid fa-circle-check"></i> <span id="uploadTxt">File selected</span></div>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="submitBtn" onclick="submitForm()">
+        <i class="fa-solid fa-bolt"></i> Generate QR Code
+      </button>
+
+      <div class="preview-card" id="previewBox" style="display:none;">
+        <h3><i class="fa-solid fa-circle-check"></i> QR Ready!</h3>
+        <div id="previewQR"></div>
+        <p>Redirecting to your QR code…</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="citizen-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const storage=firebase.storage();
+const ENC_KEY='66MXNJUNXTH';
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+});
+
+function generateId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,10);}
+function encryptData(data,key){return CryptoJS.AES.encrypt(JSON.stringify(data),key).toString();}
+
+function onFileChosen(){
+  const f=document.getElementById('fileUpload').files[0];
+  if(!f)return;
+  document.getElementById('uploadStatus').style.display='flex';
+  document.getElementById('uploadTxt').textContent=f.name+' ('+Math.round(f.size/1024)+' KB)';
+}
+
+function getGPS(){
+  return new Promise((resolve)=>{
+    if(!navigator.geolocation){ resolve(null); return; }
+    const timeout=setTimeout(()=>resolve(null),3000);
+    navigator.geolocation.getCurrentPosition(
+      pos=>{clearTimeout(timeout);resolve({lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy});},
+      ()=>{clearTimeout(timeout);resolve(null);},
+      {enableHighAccuracy:false,timeout:2500,maximumAge:60000}
+    );
+  });
+}
+
+function startFileUpload(file){
+  if(!file) return Promise.resolve(null);
+  const ref=storage.ref('uploads/'+Date.now()+'_'+file.name);
+  const task=ref.put(file);
+  const statusEl=document.getElementById('uploadStatus');
+  statusEl.style.display='flex';
+  document.getElementById('uploadTxt').textContent='Uploading...';
+  return new Promise((resolve)=>{
+    task.on('state_changed',
+      (snap)=>{
+        const pct=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+        document.getElementById('uploadTxt').textContent='Uploading... '+pct+'%';
+      },
+      (err)=>{
+        document.getElementById('uploadTxt').textContent='Upload failed: '+err.message;
+        resolve(null);
+      },
+      ()=>{
+        task.snapshot.ref.getDownloadURL().then(url=>{
+          document.getElementById('uploadTxt').textContent='Upload complete!';
+          resolve(url);
+        }).catch(()=>resolve(null));
+      }
+    );
+  });
+}
+
+async function submitForm(){
+  const dl=document.getElementById('dlNumber').value.trim();
+  const rc=document.getElementById('rcNumber').value.trim();
+  const pollution=document.getElementById('pollutionNumber').value.trim();
+  const phone=document.getElementById('phoneNumber').value.trim();
+  const fileInput=document.getElementById('fileUpload');
+  const btn=document.getElementById('submitBtn');
+
+  if(!dl||!rc||!pollution||!phone){toast('Please fill in all required fields.','err');return;}
+
+  const user=auth.currentUser;
+  if(!user){window.location.href='../index.html';return;}
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner-or"></span> Generating...';
+
+  const uniqueId=generateId();
+  const gpsData=await getGPS();
+
+  const trafficData={
+    dlNumber:dl,rcNumber:rc,pollutionNumber:pollution,phoneNumber:phone,
+    fileUrl:null,userId:user.uid,userEmail:user.email,
+    lat:gpsData?gpsData.lat:null,lng:gpsData?gpsData.lng:null,
+    gpsAccuracy:gpsData?gpsData.accuracy:null,
+    lastLocationAt:Date.now(),createdAt:Date.now(),uniqueId
+  };
+
+  const encryptedData=encryptData(trafficData,ENC_KEY);
+  const previewBox=document.getElementById('previewBox');
+  const previewQR=document.getElementById('previewQR');
+  previewQR.innerHTML='';
+  new QRCode(previewQR,{text:encryptedData,width:200,height:200,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  previewBox.style.display='block';
+  btn.innerHTML='<i class="fa-solid fa-rotate"></i> Redirecting...';
+
+  const uploadPromise=fileInput.files[0]?startFileUpload(fileInput.files[0]):Promise.resolve(null);
+
+  Promise.all([
+    db.ref('users/'+user.uid+'/trafficdata/'+uniqueId).set(trafficData),
+    db.ref('users/'+user.uid+'/lastQrCodeData').set(encryptedData),
+    db.ref('users/'+user.uid+'/lastQrId').set(uniqueId)
+  ]).catch(e=>console.warn('DB write warning:',e.message));
+
+  toast('QR code generated successfully!','ok');
+  setTimeout(()=>{ window.location.href='qrcode.html'; }, 1200);
+
+  uploadPromise.then(url=>{
+    if(url){
+      trafficData.fileUrl=url;
+      db.ref('users/'+user.uid+'/trafficdata/'+uniqueId+'/fileUrl').set(url).catch(()=>{});
+    }
+  });
+}
+</script>
+</body>
+</html>

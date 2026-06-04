@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Challans · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.sum-card{background:#fff;border:1px solid var(--cit-line-2);border-radius:14px;padding:18px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.04);transition:all var(--t) var(--ease);}
+.sum-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+.sum-card.danger{border-top:3px solid var(--cit-red);}
+.sum-card.warn{border-top:3px solid var(--cit-amber);}
+.sum-card.ok{border-top:3px solid var(--cit-green);}
+.sum-card .num{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--cit-text);}
+.sum-card.danger .num{color:var(--cit-red);}
+.sum-card.warn .num{color:#B8860B;}
+.sum-card.ok .num{color:var(--cit-green);}
+.sum-card .label{font-size:0.7rem;color:var(--cit-mute);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-top:4px;}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.tab{padding:8px 16px;border:1.5px solid var(--cit-line-2);border-radius:999px;background:#fff;color:var(--cit-mute);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all var(--t-fast) var(--ease);}
+.tab:hover{background:var(--cit-bg-2);border-color:var(--cit-saffron);color:var(--cit-saffron);}
+.tab.active{background:linear-gradient(135deg,var(--cit-saffron),#FF8C42);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(255,107,0,0.25);}
+
+.challan-card{background:#fff;border:1px solid var(--cit-line-2);border-left:5px solid var(--cit-red);border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,0.04);transition:all var(--t) var(--ease);}
+.challan-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+.challan-card.paid{border-left-color:var(--cit-green);opacity:0.92;}
+.challan-card.disputed{border-left-color:var(--cit-amber);}
+.challan-card .row1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;flex-wrap:wrap;}
+.challan-card .ctype{font-size:1rem;color:var(--cit-text);font-weight:700;flex:1;font-family:var(--font-display);}
+.challan-card .camount{font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--cit-red);white-space:nowrap;}
+.challan-card.paid .camount{color:var(--cit-green);}
+.challan-card .cmeta{font-size:0.8rem;color:var(--cit-mute);margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.challan-card .cdesc{color:#4B463E;font-size:0.88rem;line-height:1.5;margin-bottom:10px;}
+.challan-card .cvehicle{background:var(--cit-bg-2);padding:8px 12px;border-radius:8px;font-size:0.85rem;margin-bottom:10px;border-left:3px solid var(--cit-saffron);}
+.challan-card .cvehicle strong{color:var(--cit-saffron);}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:0.7rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;}
+.status-pending{background:rgba(255,176,32,0.18);color:#8B6914;}
+.status-paid{background:rgba(31,184,31,0.15);color:#0B5A0B;}
+.status-disputed{background:rgba(255,71,87,0.15);color:#7A1820;}
+.challan-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+.pay-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:200;justify-content:center;align-items:center;padding:20px;animation:fadeIn 0.2s var(--ease);}
+.pay-modal.open{display:flex;}
+.pay-modal .box{background:#fff;border-radius:18px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.20);animation:scaleIn 0.3s var(--ease-spring);}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);}}
+.pay-modal h3{color:var(--cit-text);margin-bottom:8px;display:flex;align-items:center;gap:8px;font-family:var(--font-display);}
+.pay-modal h3 i{color:var(--cit-green);}
+.pay-modal .amt{font-size:2rem;color:var(--cit-saffron);font-weight:700;text-align:center;margin:14px 0;font-family:var(--font-mono);}
+.pay-modal .payopts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+.pay-modal .payopts .btn{width:100%;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-receipt"></i> My Challans</h2>
+        <div class="sub">All traffic fines issued to you — pay online or dispute.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="summary">
+      <div class="sum-card danger"><div class="num" id="pendingCount">0</div><div class="label">Pending</div></div>
+      <div class="sum-card warn"><div class="num" id="totalAmount">₹0</div><div class="label">Amount Due</div></div>
+      <div class="sum-card ok"><div class="num" id="paidCount">0</div><div class="label">Paid</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="filterTab('all',this)">All</button>
+      <button class="tab" onclick="filterTab('pending',this)">Pending</button>
+      <button class="tab" onclick="filterTab('paid',this)">Paid</button>
+      <button class="tab" onclick="filterTab('disputed',this)">Disputed</button>
+    </div>
+
+    <div id="challanList"><div class="loading"><span class="spinner"></span> Loading…</div></div>
+
+  </div>
+</div>
+
+<!-- Pay modal -->
+<div class="pay-modal" id="payModal">
+  <div class="box">
+    <h3><i class="fa-solid fa-indian-rupee-sign"></i> Pay Challan</h3>
+    <p id="payChallanInfo" style="color:var(--cit-mute);font-size:0.85rem;"></p>
+    <div class="amt" id="payAmount">₹0</div>
+    <p style="color:var(--cit-mute);font-size:0.78rem;text-align:center;">Choose a payment method (demo — no real money is charged):</p>
+    <div class="payopts">
+      <button class="btn btn-success" onclick="mockPay('UPI')"><i class="fa-solid fa-mobile"></i> UPI</button>
+      <button class="btn btn-primary" onclick="mockPay('Card')"><i class="fa-solid fa-credit-card"></i> Card</button>
+      <button class="btn btn-ghost" onclick="mockPay('NetBanking')"><i class="fa-solid fa-building-columns"></i> NetBank</button>
+    </div>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="closePayModal()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="citizen-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+let currentUser=null;
+let allChallans=[];
+let currentPayId=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  currentUser=user;
+  loadChallans();
+});
+
+function loadChallans(){
+  db.ref('challans/'+currentUser.uid).on('value',snap=>{
+    allChallans=[];
+    if(snap.exists()) snap.forEach(c=>allChallans.push({id:c.key,...c.val()}));
+    allChallans.sort((a,b)=>(b.issuedAt||0)-(a.issuedAt||0));
+    updateSummary();
+    renderChallans('all');
+  });
+}
+
+function updateSummary(){
+  const pending=allChallans.filter(c=>c.status==='pending');
+  const paid=allChallans.filter(c=>c.status==='paid');
+  const totalAmt=pending.reduce((s,c)=>s+(c.amount||0),0);
+  document.getElementById('pendingCount').textContent=pending.length;
+  document.getElementById('paidCount').textContent=paid.length;
+  document.getElementById('totalAmount').textContent='₹'+totalAmt.toLocaleString('en-IN');
+}
+
+function renderChallans(filter){
+  const list=document.getElementById('challanList');
+  const arr=filter==='all'?allChallans:allChallans.filter(c=>(c.status||'pending')===filter);
+  if(arr.length===0){
+    list.innerHTML='<div class="empty"><i class="fa-solid fa-circle-check"></i>'+(filter==='all'?'No challans on record. Drive safe!':'No challans in this category.')+'</div>';
+    return;
+  }
+  list.innerHTML=arr.map(c=>{
+    const status=c.status||'pending';
+    return `
+    <div class="challan-card ${status}">
+      <div class="row1">
+        <div class="ctype">${esc(c.violationType||'Traffic Violation')}</div>
+        <div class="camount">₹${(c.amount||0).toLocaleString('en-IN')}</div>
+      </div>
+      <div class="cmeta">
+        <span class="status-badge status-${status}">${status==='pending'?'⏱ Pending':status==='paid'?'✓ Paid':'⚖ Disputed'}</span>
+        · Issued: ${esc(c.issuedAtReadable||new Date(c.issuedAt).toLocaleString())}
+        ${c.issuedBy?`· By: ${esc(c.issuedBy)}`:''}
+      </div>
+      <div class="cdesc">${esc(c.description||'No description provided.')}</div>
+      ${c.vehicleRC?`<div class="cvehicle">🚗 Vehicle: <strong>${esc(c.vehicleRC)}</strong></div>`:''}
+      ${c.status==='pending'?`
+        <div class="challan-actions">
+          <button class="btn btn-success btn-sm" onclick='openPayModal("${c.id}")'><i class="fa-solid fa-indian-rupee-sign"></i> Pay ₹${c.amount}</button>
+          <button class="btn btn-ghost btn-sm" onclick='disputeChallan("${c.id}")'><i class="fa-solid fa-scale-balanced"></i> Dispute</button>
+        </div>
+      `:c.status==='paid'?`
+        <div style="font-size:0.78rem;color:var(--cit-green);margin-top:8px;display:flex;align-items:center;gap:4px;"><i class="fa-solid fa-circle-check"></i> Paid on ${esc(c.paidAtReadable||new Date(c.paidAt).toLocaleString())} via ${esc(c.paidVia||'UPI')}</div>
+      `:`<div style="font-size:0.78rem;color:#8B6914;margin-top:8px;display:flex;align-items:center;gap:4px;"><i class="fa-solid fa-scale-balanced"></i> Under review</div>`}
+    </div>`;
+  }).join('');
+}
+
+function filterTab(t,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChallans(t);
+}
+
+function openPayModal(id){
+  const c=allChallans.find(x=>x.id===id);
+  if(!c)return;
+  currentPayId=id;
+  document.getElementById('payChallanInfo').textContent=c.violationType+' · Issued '+new Date(c.issuedAt).toLocaleDateString();
+  document.getElementById('payAmount').textContent='₹'+c.amount;
+  document.getElementById('payModal').classList.add('open');
+}
+function closePayModal(){document.getElementById('payModal').classList.remove('open');currentPayId=null;}
+
+function mockPay(method){
+  if(!currentPayId)return;
+  const update={status:'paid',paidVia:method,paidAt:Date.now(),paidAtReadable:new Date().toLocaleString(),transactionId:'TXN'+Date.now().toString(36).toUpperCase()};
+  db.ref('challans/'+currentUser.uid+'/'+currentPayId).update(update).then(()=>{
+    closePayModal();
+    toast('Payment of ₹'+allChallans.find(x=>x.id===currentPayId).amount+' successful via '+method+'!','ok');
+  });
+}
+
+function disputeChallan(id){
+  const reason=prompt('Briefly explain why you are disputing this challan:');
+  if(!reason){toast('Dispute cancelled','err');return;}
+  db.ref('challans/'+currentUser.uid+'/'+id).update({status:'disputed',disputeReason:reason,disputedAt:Date.now(),disputedAtReadable:new Date().toLocaleString()}).then(()=>toast('Dispute submitted','ok'));
+}
+
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>

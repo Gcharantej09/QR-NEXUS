@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two-Wheeler License · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.form-card{background:#fff;border:1px solid var(--cit-line-2);border-radius:18px;padding:24px;margin:0 auto;max-width:640px;box-shadow:0 4px 14px rgba(0,0,0,0.05);}
+.section{background:var(--cit-bg-2);border:1px solid var(--cit-line-2);border-radius:14px;padding:20px;margin-bottom:14px;}
+.section h3{font-size:1rem;margin-bottom:14px;display:flex;align-items:center;gap:10px;color:var(--cit-text);font-family:var(--font-display);padding-bottom:10px;border-bottom:1px solid var(--cit-line-2);}
+.section h3 .step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--cit-saffron),#FF8C42);color:#fff;font-size:0.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(255,107,0,0.25);}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+@media(max-width:640px){.row{grid-template-columns:1fr;}}
+.fee-box{background:linear-gradient(135deg,#FFF8E8,#FFF);border:1px solid var(--cit-saffron);border-radius:12px;padding:16px;text-align:center;margin:16px 0;position:relative;overflow:hidden;}
+.fee-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cit-saffron),var(--cit-green));}
+.fee-box .label{font-size:0.78rem;color:var(--cit-mute);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+.fee-box .amount{font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--cit-saffron);margin-top:4px;}
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;margin:14px 0;font-size:0.85rem;line-height:1.5;color:var(--cit-text);}
+.checkbox-row input{margin-top:3px;flex-shrink:0;width:18px;height:18px;accent-color:var(--cit-saffron);}
+.msg{padding:12px 14px;border-radius:10px;font-size:0.88rem;margin-top:12px;display:none;align-items:flex-start;gap:8px;}
+.msg.success{background:rgba(31,184,31,0.10);color:#0B5A0B;border:1px solid rgba(31,184,31,0.30);}
+.msg.error{background:rgba(255,71,87,0.10);color:#7A1820;border:1px solid rgba(255,71,87,0.30);}
+.msg i{flex-shrink:0;margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-motorcycle"></i> Two-Wheeler License</h2>
+        <div class="sub">Apply for Learning License or Permanent Driving License.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="form-card">
+      <form id="licenseForm" autocomplete="off">
+        <div class="section">
+          <h3><span class="step-num">1</span> License Type</h3>
+          <div class="field">
+            <label>I am applying for</label>
+            <select class="input" id="licenseType" onchange="updateFee()">
+              <option value="ll-50cc">Learning License (50cc gearless)</option>
+              <option value="ll-gear" selected>Learning License (with gear, all MCWG)</option>
+              <option value="dl-permanent">Permanent Driving License (with gear)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Existing LL Number (for DL upgrade only)</label>
+            <input class="input" type="text" id="existingLL" placeholder="Leave blank if first-time applicant">
+          </div>
+        </div>
+
+        <div class="section">
+          <h3><span class="step-num">2</span> Personal Details</h3>
+          <div class="row">
+            <div class="field"><label>Full Name (as on Aadhaar)</label><input class="input" type="text" id="fullName" required></div>
+            <div class="field"><label>Father / Guardian Name</label><input class="input" type="text" id="fatherName" required></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Date of Birth</label><input class="input" type="date" id="dob" required></div>
+            <div class="field"><label>Gender</label>
+              <select class="input" id="gender" required>
+                <option value="">Select</option>
+                <option>Male</option><option>Female</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Blood Group</label>
+              <select class="input" id="bloodGroup">
+                <option value="">Select</option>
+                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+              </select>
+            </div>
+            <div class="field"><label>Aadhaar Number</label><input class="input" type="text" id="aadhaar" pattern="[0-9]{12}" placeholder="12 digits"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3><span class="step-num">3</span> Address</h3>
+          <div class="field"><label>House / Flat No.</label><input class="input" type="text" id="houseNo" required></div>
+          <div class="field"><label>Street / Area / Landmark</label><input class="input" type="text" id="street" required></div>
+          <div class="row">
+            <div class="field"><label>City / Town</label><input class="input" type="text" id="city" required></div>
+            <div class="field"><label>State</label>
+              <select class="input" id="state" required>
+                <option value="">Select</option>
+                <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option>
+                <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option>
+                <option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+                <option>Maharashtra</option><option>Manipur</option><option>Meghaland</option>
+                <option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                <option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option>
+                <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+                <option>Delhi</option><option>Jammu and Kashmir</option><option>Ladakh</option>
+                <option>Chandigarh</option><option>Puducherry</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field"><label>PIN Code</label><input class="input" type="text" id="pin" pattern="[0-9]{6}" required></div>
+            <div class="field"><label>Mobile (for OTP)</label><input class="input" type="tel" id="mobile" pattern="[0-9]{10}" required></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3><span class="step-num">4</span> Documents Submitted</h3>
+          <div class="field"><label>Address Proof Type</label>
+            <select class="input">
+              <option>Aadhaar</option><option>Passport</option><option>Voter ID</option>
+              <option>Electricity Bill</option><option>Rent Agreement</option>
+            </select>
+          </div>
+          <div class="field"><label>Age Proof Type</label>
+            <select class="input">
+              <option>Birth Certificate</option><option>10th Marksheet</option>
+              <option>Passport</option><option>Aadhaar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fee-box">
+          <div class="label">Application Fee</div>
+          <div class="amount" id="feeDisplay">₹200</div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="declaration" required>
+          <span>I declare that the information provided is true. I understand that any false information may lead to rejection / cancellation. I consent to the processing of my data by the traffic department.</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn"><i class="fa-solid fa-paper-plane"></i> Submit Application</button>
+        <div class="msg" id="msgBox"></div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="citizen-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const FEES={'ll-50cc':150,'ll-gear':200,'dl-permanent':400};
+
+let currentUser=null;
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  currentUser=user;
+  if(user.displayName) document.getElementById('fullName').value=user.displayName;
+});
+
+function updateFee(){
+  const t=document.getElementById('licenseType').value;
+  document.getElementById('feeDisplay').textContent='₹'+FEES[t];
+}
+
+document.getElementById('licenseForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!currentUser) return;
+  const btn=document.getElementById('submitBtn');
+  const msg=document.getElementById('msgBox');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Submitting...';
+  msg.style.display='none';
+
+  const application={
+    licenseType:document.getElementById('licenseType').value,
+    licenseTypeLabel:document.getElementById('licenseType').selectedOptions[0].text,
+    existingLL:document.getElementById('existingLL').value.trim(),
+    fullName:document.getElementById('fullName').value.trim(),
+    fatherName:document.getElementById('fatherName').value.trim(),
+    dob:document.getElementById('dob').value,
+    gender:document.getElementById('gender').value,
+    bloodGroup:document.getElementById('bloodGroup').value,
+    aadhaar:document.getElementById('aadhaar').value.trim(),
+    houseNo:document.getElementById('houseNo').value.trim(),
+    street:document.getElementById('street').value.trim(),
+    city:document.getElementById('city').value.trim(),
+    state:document.getElementById('state').value,
+    pin:document.getElementById('pin').value.trim(),
+    mobile:document.getElementById('mobile').value.trim(),
+    fee:FEES[document.getElementById('licenseType').value],
+    userId:currentUser.uid,userEmail:currentUser.email,
+    status:'submitted',submittedAt:Date.now(),submittedAtReadable:new Date().toLocaleString()
+  };
+
+  try{
+    const ref=db.ref('licenseApplications/'+currentUser.uid).push();
+    application.referenceId=ref.key;
+    await ref.set(application);
+    msg.className='msg success';
+    msg.innerHTML='<i class="fa-solid fa-circle-check"></i> <div><b>Application submitted successfully!</b><br>Reference ID: <code style="font-family:var(--font-mono);">'+ref.key+'</code><br>You will receive an SMS on your registered mobile for the test slot.</div>';
+    msg.style.display='flex';
+    btn.innerHTML='<i class="fa-solid fa-circle-check"></i> Submitted';
+    btn.disabled=true;
+    toast('Application submitted!','ok');
+    window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+  }catch(err){
+    msg.className='msg error';
+    msg.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Submission failed: '+err.message;
+    msg.style.display='flex';
+    btn.disabled=false;
+    btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Submit Application';
+  }
+});
+</script>
+</body>
+</html>

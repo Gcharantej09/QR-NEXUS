@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watchlist · QR Nexus Officer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="admin.css">
+<style>
+.alert-bar{
+  background:linear-gradient(135deg,rgba(255,71,87,0.20),rgba(255,107,0,0.15));
+  border:1px solid rgba(255,71,87,0.35);
+  color:#FFD2D6;padding:12px 18px;border-radius:12px;margin-bottom:18px;
+  display:flex;align-items:center;gap:12px;animation:alertPulse 2.4s var(--ease) infinite;
+}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,0.4);}50%{box-shadow:0 0 0 8px rgba(255,71,87,0);}}
+.alert-bar .pulse{width:12px;height:12px;background:var(--neon-red);border-radius:50%;animation:pulse 1.4s infinite;flex-shrink:0;}
+
+.user-card{
+  background:linear-gradient(160deg, rgba(255,71,87,0.05), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,71,87,0.25);border-left:4px solid var(--neon-red);
+  border-radius:14px;padding:18px;margin-bottom:14px;
+  position:relative;overflow:hidden;transition:all var(--t) var(--ease);
+}
+.user-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,0.4);}
+.user-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.user-avatar{
+  width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(135deg,var(--neon-red),#C0392B);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;font-weight:700;flex-shrink:0;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,0.15);
+}
+.user-info{flex:1;min-width:0;}
+.user-info .name{font-size:1rem;color:#fff;font-weight:600;}
+.user-info .sub{font-size:0.78rem;color:var(--console-mute);margin-top:2px;word-break:break-all;}
+.flagged-time{font-size:0.75rem;color:var(--neon-amber);font-weight:600;font-family:var(--font-mono);}
+
+.flag-reason{
+  background:rgba(255,176,32,0.08);border:1px solid rgba(255,176,32,0.25);
+  border-left:3px solid var(--neon-amber);
+  padding:8px 12px;border-radius:8px;font-size:0.85rem;color:#FFD98A;margin-bottom:12px;
+}
+
+.movements{margin-top:10px;}
+.movement{
+  background:rgba(0,0,0,0.2);padding:10px 12px;border-radius:8px;margin-bottom:6px;
+  font-size:0.85rem;border-left:3px solid var(--saffron);
+}
+.movement .time{color:var(--console-mute);font-size:0.75rem;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.movement .loc{color:#fff;}
+.movement .loc a{color:var(--neon-cyan);text-decoration:none;}
+.movement .loc a:hover{text-decoration:underline;}
+.movement .speed{color:var(--neon-green);font-weight:600;font-size:0.82rem;margin-top:4px;}
+.movement .speed.high{
+  background:rgba(255,71,87,0.18);color:#FFB6BD;
+  padding:6px 10px;border-radius:6px;display:inline-block;margin-top:6px;
+  animation:flash 1.5s ease-in-out infinite;border:1px solid rgba(255,71,87,0.4);
+}
+@keyframes flash{0%,100%{background:rgba(255,71,87,0.18);}50%{background:rgba(255,71,87,0.32);}}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+
+.section-title{font-size:0.78rem;color:var(--console-mute);margin:0 0 12px;text-transform:uppercase;letter-spacing:0.12em;font-weight:700;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';width:4px;height:14px;border-radius:2px;background:linear-gradient(180deg,var(--neon-red),var(--neon-amber));}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="adminTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-triangle-exclamation"></i> Watchlist</h2>
+        <div class="sub">Track and monitor flagged citizens — speed violations and recent movements are computed live.</div>
+      </div>
+      <a class="back-link" href="adminhome.html"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+    </div>
+
+    <div class="alert-bar" id="alertBar" style="display:none;">
+      <div class="pulse"></div>
+      <div><strong id="alertText">Loading…</strong></div>
+    </div>
+
+    <div id="watchList"><div class="loading"><span class="spinner"></span> Loading watchlist…</div></div>
+
+  </div>
+</div>
+
+<!-- Flag Modal -->
+<div class="modal" id="flagModal">
+  <div class="box">
+    <button class="modal-close" onclick="closeFlagModal()">&times;</button>
+    <h3><i class="fa-solid fa-flag"></i> Flag User as Suspicious</h3>
+    <p class="sub" id="flagUserInfo"></p>
+    <div class="field"><label>Reason</label>
+      <select class="input" id="flagReason">
+        <option>Document mismatch</option>
+        <option>Suspicious behavior</option>
+        <option>Multiple vehicles with same plate</option>
+        <option>Reported by another officer</option>
+        <option>Stolen vehicle suspected</option>
+        <option>No valid documents</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Additional notes</label>
+      <textarea class="input" id="flagNotes" placeholder="Optional details…"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-danger" style="flex:1;" onclick="confirmFlag()"><i class="fa-solid fa-flag"></i> Confirm Flag</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeFlagModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Challan Modal -->
+<div class="modal" id="challanModal">
+  <div class="box">
+    <button class="modal-close" onclick="closeChallanModal()">&times;</button>
+    <h3><i class="fa-solid fa-receipt"></i> Issue Challan</h3>
+    <p class="sub" id="challanUserInfo"></p>
+    <div class="field"><label>Violation type</label>
+      <select class="input" id="violationType">
+        <option>Speeding (over 100 km/h implied)</option>
+        <option>Document mismatch</option>
+        <option>No valid DL/RC at time of stop</option>
+        <option>Expired PUC</option>
+        <option>Wrong side driving</option>
+        <option>Signal jumping</option>
+        <option>No helmet (two-wheeler)</option>
+        <option>No seatbelt (car)</option>
+        <option>Use of mobile while driving</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Vehicle RC (if applicable)</label>
+      <input class="input" type="text" id="challanVehicle" placeholder="e.g. TS09AB1234">
+    </div>
+    <div class="field"><label>Amount (₹)</label>
+      <input class="input" type="number" id="challanAmount" value="1000" min="100">
+    </div>
+    <div class="field"><label>Description</label>
+      <textarea class="input" id="challanDesc" placeholder="Details of violation…"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-amber" style="flex:1;" onclick="confirmChallan()"><i class="fa-solid fa-receipt"></i> Issue Challan</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeChallanModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="admin-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+
+let currentOfficer=null;
+let flagTarget=null;
+let challanTarget=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  if(!adminEmails.includes(user.email)){window.location.href='../index.html';return;}
+  currentOfficer=user;
+  loadWatchlist();
+});
+
+function loadWatchlist(){
+  db.ref('watchlist/'+currentOfficer.uid).on('value',snap=>{
+    const list=document.getElementById('watchList');
+    const arr=[];
+    if(snap.exists()){snap.forEach(c=>arr.push({id:c.key,...c.val()}));}
+    arr.sort((a,b)=>(b.flaggedAt||0)-(a.flaggedAt||0));
+
+    const alertBar=document.getElementById('alertBar');
+    if(arr.length>0){
+      alertBar.style.display='flex';
+      document.getElementById('alertText').textContent=arr.length+' user'+(arr.length>1?'s':'')+' under active surveillance';
+    }else{
+      alertBar.style.display='none';
+    }
+
+    if(arr.length===0){
+      list.innerHTML='<div class="empty"><i class="fa-solid fa-shield-halved"></i>No users flagged.<br><span style="opacity:0.7;font-size:0.85rem;">Flag users from the scan result or scan history to start tracking.</span></div>';
+      return;
+    }
+
+    Promise.all(arr.map(u=>db.ref('scanHistory/'+currentOfficer.uid+'/'+u.userUid).orderByChild('scannedAt').limitToLast(5).once('value').then(s=>{
+      const scans=[];
+      s.forEach(c=>scans.push(c.val()));
+      scans.reverse();
+      return {...u, scans};
+    }))).then(merged=>{
+      list.innerHTML=`<div class="section-title">${merged.length} flagged citizen${merged.length>1?'s':''}</div>`+merged.map(u=>renderUser(u)).join('');
+    });
+  });
+}
+
+function renderUser(u){
+  const name=(u.userEmail||'').split('@')[0] || 'User';
+  const initial=name.charAt(0).toUpperCase() || '?';
+  return `
+    <div class="user-card" data-uid="${u.userUid}">
+      <div class="user-head">
+        <div class="user-avatar">${initial}</div>
+        <div class="user-info">
+          <div class="name">${escapeHtml(name)}</div>
+          <div class="sub">${escapeHtml(u.userEmail||'')}</div>
+        </div>
+        <div class="flagged-time"><i class="fa-solid fa-flag"></i> ${new Date(u.flaggedAt).toLocaleDateString()}</div>
+      </div>
+      <div class="flag-reason"><strong>Reason:</strong> ${escapeHtml(u.reason||'Not specified')}${u.notes?'<br><strong>Notes:</strong> '+escapeHtml(u.notes):''}</div>
+      <div style="font-size:0.85rem;font-weight:600;color:#fff;margin:8px 0 6px;display:flex;align-items:center;gap:6px;">
+        <i class="fa-solid fa-route" style="color:var(--saffron);"></i> Recent Movements (${u.scans.length} scan${u.scans.length>1?'s':''})
+      </div>
+      <div class="movements">
+        ${u.scans.length===0?'<p style="color:var(--console-mute);font-size:0.85rem;">No scans yet.</p>':u.scans.map((s,i)=>{
+          const next=u.scans[i+1];
+          let speedTxt='';
+          if(next && next.officerLat!=null && s.officerLat!=null){
+            const dist=haversineKm(s.officerLat,s.officerLng,next.officerLat,next.officerLng);
+            const dt=(next.scannedAt-s.scannedAt)/3600000;
+            if(dt>0){
+              const spd=dist/dt;
+              if(spd>100){
+                speedTxt=`<div class="speed high">⚠ Implied speed: ${Math.round(spd)} km/h over ${dist.toFixed(1)} km in ${dt.toFixed(1)}h — exceeds 100 km/h</div>`;
+              }else{
+                speedTxt=`<div class="speed">✓ Speed: ${Math.round(spd)} km/h over ${dist.toFixed(1)} km</div>`;
+              }
+            }
+          }
+          const loc=s.officerLat!=null?
+            `📍 <a href="https://www.google.com/maps?q=${s.officerLat},${s.officerLng}" target="_blank">${s.officerLat.toFixed(4)}, ${s.officerLng.toFixed(4)}</a>`
+            :'Location not captured';
+          return `<div class="movement">
+            <div class="time"><i class="fa-regular fa-clock"></i> ${escapeHtml(s.scannedAtReadable||new Date(s.scannedAt).toLocaleString())} · By ${escapeHtml(s.scannedBy||'—')}</div>
+            <div class="loc">${loc}</div>
+            ${speedTxt}
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="actions">
+        <button class="btn btn-amber btn-sm" onclick='openChallanModal("${u.userUid}","${escAttr(u.userEmail||'')}")'><i class="fa-solid fa-receipt"></i> Issue Challan</button>
+        <button class="btn btn-cyan btn-sm" onclick='issueAutoChallanIfSpeeding("${u.userUid}","${escAttr(u.userEmail||'')}',${JSON.stringify(u.scans).replace(/'/g,"&#39;")})'><i class="fa-solid fa-bolt"></i> Auto Challan (if speeding)</button>
+        <button class="btn btn-danger btn-sm" onclick='unflagUser("${u.userUid}")'><i class="fa-solid fa-xmark"></i> Remove</button>
+      </div>
+    </div>
+  `;
+}
+
+function haversineKm(lat1,lng1,lat2,lng2){
+  const R=6371;
+  const toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function openFlagModal(uid,email){
+  flagTarget={uid,email};
+  document.getElementById('flagUserInfo').textContent='Flag '+email+' as suspicious?';
+  document.getElementById('flagModal').classList.add('open');
+}
+function closeFlagModal(){document.getElementById('flagModal').classList.remove('open');flagTarget=null;}
+
+function confirmFlag(){
+  if(!flagTarget||!currentOfficer)return;
+  db.ref('watchlist/'+currentOfficer.uid+'/'+flagTarget.uid).set({
+    userUid:flagTarget.uid,userEmail:flagTarget.email,
+    reason:document.getElementById('flagReason').value,
+    notes:document.getElementById('flagNotes').value.trim(),
+    flaggedBy:currentOfficer.email,flaggedAt:Date.now(),flaggedAtReadable:new Date().toLocaleString()
+  }).then(()=>{closeFlagModal();toast(flagTarget.email+' flagged','ok');});
+}
+
+function unflagUser(uid){
+  if(!confirm('Remove this user from the watchlist?'))return;
+  db.ref('watchlist/'+currentOfficer.uid+'/'+uid).remove().then(()=>toast('Removed from watchlist','ok'));
+}
+
+function openChallanModal(uid,email){
+  challanTarget={uid,email};
+  document.getElementById('challanUserInfo').textContent='Issue challan to: '+email;
+  document.getElementById('challanModal').classList.add('open');
+}
+function closeChallanModal(){document.getElementById('challanModal').classList.remove('open');challanTarget=null;}
+
+function confirmChallan(){
+  if(!challanTarget)return;
+  const violationType=document.getElementById('violationType').value;
+  const amount=parseInt(document.getElementById('challanAmount').value)||1000;
+  const vehicleRC=document.getElementById('challanVehicle').value.trim().toUpperCase();
+  const description=document.getElementById('challanDesc').value.trim() || violationType;
+  const challan={
+    violationType,description,amount,vehicleRC,
+    issuedBy:currentOfficer.email,issuedAt:Date.now(),issuedAtReadable:new Date().toLocaleString(),status:'pending'
+  };
+  const ref=db.ref('challans/'+challanTarget.uid).push();
+  challan.challanId=ref.key;
+  ref.set(challan).then(()=>{
+    closeChallanModal();
+    toast('Challan of ₹'+amount+' issued to '+challanTarget.email,'ok');
+    document.getElementById('violationType').selectedIndex=0;
+    document.getElementById('challanAmount').value='1000';
+    document.getElementById('challanVehicle').value='';
+    document.getElementById('challanDesc').value='';
+  });
+}
+
+function issueAutoChallanIfSpeeding(uid,email,scans){
+  for(let i=0;i<scans.length-1;i++){
+    const a=scans[i], b=scans[i+1];
+    if(a.officerLat==null||b.officerLat==null)continue;
+    const dist=haversineKm(a.officerLat,a.officerLng,b.officerLat,b.officerLng);
+    const dt=(b.scannedAt-a.scannedAt)/3600000;
+    if(dt>0 && dist/dt>100){
+      const challan={
+        violationType:'Speeding (implied >100 km/h)',
+        description:'Scan at '+a.scannedAtReadable+' and re-scan at '+b.scannedAtReadable+' implies ~'+Math.round(dist/dt)+' km/h over '+dist.toFixed(1)+' km. Auto-generated.',
+        amount:2000,vehicleRC:a.rcNumber||'',
+        issuedBy:currentOfficer.email,issuedAt:Date.now(),issuedAtReadable:new Date().toLocaleString(),
+        status:'pending',autoGenerated:true
+      };
+      const ref=db.ref('challans/'+uid).push();
+      challan.challanId=ref.key;
+      ref.set(challan);
+      toast('Auto-challan issued: '+Math.round(dist/dt)+' km/h','ok');
+      return;
+    }
+  }
+  toast('No speeding detected between recent scans','err');
+}
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function escAttr(s){return String(s||'').replace(/'/g,"\\'");}
+</script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FF6B00">
+<title>QR NEXUS — Government of India Traffic System</title>
+
+<!-- Google Fonts: Space Grotesk + Inter + Mukta (Devanagari) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Mukta:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<style>
+  body{
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,107,0,0.18), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(19,136,8,0.18), transparent 45%),
+      linear-gradient(135deg,#0A0E27 0%,#1A1A4E 50%,#0A0E27 100%);
+    color:#fff;
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    overflow-x:hidden;
+  }
+  /* Animated background particles */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(2px 2px at 20% 30%,rgba(255,255,255,0.3),transparent),
+      radial-gradient(2px 2px at 60% 70%,rgba(255,107,0,0.4),transparent),
+      radial-gradient(1px 1px at 50% 50%,rgba(255,255,255,0.2),transparent),
+      radial-gradient(1px 1px at 80% 10%,rgba(46,213,115,0.3),transparent),
+      radial-gradient(2px 2px at 90% 60%,rgba(255,255,255,0.25),transparent);
+    background-size:200px 200px;
+    animation:float 20s linear infinite;
+  }
+  @keyframes float{from{background-position:0 0}to{background-position:200px 200px}}
+
+  .shell{
+    position:relative;z-index:2;
+    display:grid;grid-template-columns:1.1fr 1fr;
+    max-width:1080px;width:100%;
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:28px;overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,0.5);
+    animation:scaleIn 0.6s var(--ease-spring) both;
+  }
+  @media (max-width:880px){.shell{grid-template-columns:1fr;}}
+
+  /* LEFT — hero */
+  .hero-side{
+    padding:48px 40px;
+    display:flex;flex-direction:column;justify-content:space-between;
+    background:
+      linear-gradient(135deg,rgba(255,107,0,0.15) 0%,transparent 50%,rgba(19,136,8,0.15) 100%);
+    border-right:1px solid rgba(255,255,255,0.08);
+    position:relative;overflow:hidden;
+  }
+  .hero-side::after{
+    content:'';position:absolute;bottom:-30%;right:-30%;width:300px;height:300px;
+    background:radial-gradient(circle,rgba(255,107,0,0.25),transparent 70%);
+    border-radius:50%;pointer-events:none;
+  }
+  .badge-govt{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px;border-radius:var(--r-pill);
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.2);
+    font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;
+    width:fit-content;
+  }
+  .badge-govt .dot{width:8px;height:8px;background:#2ED573;border-radius:50%;box-shadow:0 0 0 4px rgba(46,213,115,0.2);animation:pulse 2s infinite;}
+  .brand{
+    font-family:var(--font-display);font-size:2.4rem;font-weight:700;letter-spacing:-0.03em;
+    line-height:1.1;margin:18px 0 8px;
+  }
+  .brand .hindi{display:block;font-family:var(--font-hindi);font-size:1.6rem;opacity:0.85;font-weight:600;margin-top:4px;}
+  .tagline{opacity:0.78;font-size:0.95rem;line-height:1.6;max-width:380px;}
+  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;}
+  .feature{
+    background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+    border-radius:14px;padding:12px 14px;
+    display:flex;align-items:center;gap:10px;
+    transition:all var(--t) var(--ease);
+  }
+  .feature:hover{transform:translateY(-2px);background:rgba(255,255,255,0.12);}
+  .feature .icon{font-size:1.4rem;}
+  .feature .label{font-size:0.8rem;font-weight:600;}
+  .feature .sub{font-size:0.7rem;opacity:0.7;}
+  .footer-strip{
+    display:flex;align-items:center;gap:12px;margin-top:24px;
+    font-size:0.72rem;opacity:0.6;
+  }
+  .footer-strip .ashoka{width:32px;height:32px;border-radius:50%;background:#fff;color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+
+  /* RIGHT — form */
+  .form-side{padding:48px 40px;background:rgba(255,255,255,0.04);}
+  .form-side h2{font-family:var(--font-display);font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:6px;}
+  .form-side .sub{text-align:center;font-size:0.85rem;opacity:0.7;margin-bottom:24px;}
+
+  .tabs{
+    display:flex;background:rgba(255,255,255,0.06);border-radius:var(--r-pill);
+    padding:4px;margin-bottom:24px;position:relative;border:1px solid rgba(255,255,255,0.1);
+  }
+  .tabs .slider{
+    position:absolute;top:4px;left:4px;height:calc(100% - 8px);
+    background:var(--grad-primary);border-radius:var(--r-pill);
+    transition:transform var(--t) var(--ease-spring),width var(--t) var(--ease-spring);
+    box-shadow:0 4px 12px rgba(255,107,0,0.3);
+  }
+  .tab-btn{
+    flex:1;padding:10px 0;background:transparent;border:none;
+    color:#fff;font-family:var(--font-body);font-size:0.9rem;font-weight:600;
+    cursor:pointer;border-radius:var(--r-pill);transition:color var(--t) var(--ease);
+    position:relative;z-index:2;
+  }
+  .tab-btn.active{color:#fff;}
+
+  .input-group{position:relative;margin-bottom:16px;}
+  .input-group label{display:block;font-size:0.78rem;font-weight:600;margin-bottom:6px;opacity:0.85;letter-spacing:0.02em;}
+  .input-group .input-icon{position:absolute;left:14px;top:38px;font-size:1.05rem;opacity:0.7;}
+  .input-group input{
+    width:100%;padding:14px 14px 14px 44px;
+    background:rgba(255,255,255,0.08);
+    border:1.5px solid rgba(255,255,255,0.15);
+    border-radius:var(--r-sm);color:#fff;
+    font-family:var(--font-body);font-size:0.95rem;outline:none;
+    transition:all var(--t-fast) var(--ease);
+  }
+  .input-group input::placeholder{color:rgba(255,255,255,0.45);}
+  .input-group input:focus{
+    background:rgba(255,255,255,0.12);
+    border-color:var(--primary);
+    box-shadow:0 0 0 4px rgba(255,107,0,0.18);
+  }
+  .pw-wrap{position:relative;}
+  .pw-wrap .toggle{
+    position:absolute;right:14px;top:50%;transform:translateY(-50%);
+    background:none;border:none;color:rgba(255,255,255,0.6);
+    cursor:pointer;font-size:0.78rem;font-weight:600;padding:4px 8px;
+  }
+  .err-msg{
+    background:rgba(255,71,87,0.12);border:1px solid rgba(255,71,87,0.3);
+    color:#ffb3b3;padding:10px 14px;border-radius:var(--r-sm);
+    font-size:0.82rem;margin-top:8px;display:none;
+    animation:shake 0.4s var(--ease);
+  }
+  .err-msg.show{display:flex;align-items:center;gap:8px;}
+  .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+  .btn-login,.btn-reg{
+    padding:14px;border:none;border-radius:var(--r-pill);
+    font-family:var(--font-body);font-size:0.95rem;font-weight:600;
+    color:#fff;cursor:pointer;transition:all var(--t) var(--ease);
+    position:relative;overflow:hidden;letter-spacing:0.02em;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .btn-login{background:var(--grad-primary);box-shadow:0 4px 14px rgba(255,107,0,0.4);}
+  .btn-reg{background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);}
+  .btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(255,107,0,0.5);}
+  .btn-reg:hover{background:rgba(255,255,255,0.15);}
+  .btn-login:active,.btn-reg:active{transform:translateY(0) scale(0.97);}
+
+  .forgot{text-align:center;margin-top:16px;}
+  .forgot a{color:#FF8C42;font-size:0.82rem;cursor:pointer;font-weight:500;transition:color 0.2s;}
+  .forgot a:hover{text-decoration:underline;color:#FF6B00;}
+  .forgot a[disabled]{opacity:0.5;pointer-events:none;}
+
+  /* Help banner under the form */
+  .help-tip{
+    display:flex;align-items:flex-start;gap:10px;
+    background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.25);
+    border-left:3px solid #00E5FF;
+    border-radius:10px;padding:10px 12px;margin-top:14px;
+    font-size:0.78rem;color:rgba(255,255,255,0.85);line-height:1.5;
+  }
+  .help-tip i{color:#00E5FF;margin-top:2px;flex-shrink:0;}
+  .help-tip code{background:rgba(255,255,255,0.10);padding:1px 6px;border-radius:4px;font-family:var(--font-mono);font-size:0.75rem;color:#00E5FF;}
+
+  /* Toast */
+  .toast{
+    position:fixed;top:20px;right:20px;z-index:200;
+    background:rgba(46,213,115,0.15);backdrop-filter:blur(20px);
+    border:1px solid rgba(46,213,115,0.3);color:#fff;
+    padding:14px 20px;border-radius:var(--r-pill);
+    font-size:0.88rem;font-weight:500;
+    box-shadow:var(--shadow-lg);
+    display:flex;align-items:center;gap:10px;
+    transform:translateX(120%);
+    transition:transform var(--t) var(--ease-spring);
+  }
+  .toast.show{transform:translateX(0);}
+  .toast.error{background:rgba(255,71,87,0.15);border-color:rgba(255,71,87,0.4);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- LEFT -->
+  <div class="hero-side">
+    <div class="badge-govt animate-fadeInDown"><span class="dot"></span> Government of India Initiative</div>
+    <div style="margin-top:24px;">
+      <div class="brand animate-fadeInUp stagger-1">
+        QR NEXUS
+        <span class="hindi">क्यूआर नेक्सस</span>
+      </div>
+      <p class="tagline animate-fadeInUp stagger-2">
+        A digital traffic document system for the citizens of India. Verify, track, and manage your vehicle documents in seconds — paperless, secure, and trusted.
+      </p>
+      <div class="feature-grid animate-fadeInUp stagger-3">
+        <div class="feature"><div class="icon">🔒</div><div><div class="label">256-bit Encrypted</div><div class="sub">Your data is safe</div></div></div>
+        <div class="feature"><div class="icon">⚡</div><div><div class="label">Instant Verify</div><div class="sub">One scan, all data</div></div></div>
+        <div class="feature"><div class="icon">🇮🇳</div><div><div class="label">Made for India</div><div class="sub">All states supported</div></div></div>
+        <div class="feature"><div class="icon">📱</div><div><div class="label">Works Offline</div><div class="sub">No data? No problem</div></div></div>
+      </div>
+    </div>
+    <div class="footer-strip animate-fadeIn stagger-4">
+      <div class="ashoka">☸</div>
+      <div>
+        <div>Ministry of Road Transport & Highways</div>
+        <div style="opacity:0.7;">Government of India · Digital India Initiative</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="form-side">
+    <h2>Welcome 🙏</h2>
+    <p class="sub" id="tabHint">Citizen login for vehicle owners & drivers</p>
+
+    <div class="tabs">
+      <div class="slider" id="tabSlider"></div>
+      <button class="tab-btn active" id="userTab" onclick="switchTab('user')">👤 Citizen</button>
+      <button class="tab-btn" id="adminTab" onclick="switchTab('admin')">👮 Officer</button>
+    </div>
+
+    <form id="loginForm" autocomplete="off" onsubmit="event.preventDefault();login();">
+      <div class="input-group">
+        <label>Email Address</label>
+        <span class="input-icon">✉</span>
+        <input type="email" id="email" placeholder="you@example.com" required>
+      </div>
+      <div class="input-group pw-wrap">
+        <label>Password</label>
+        <span class="input-icon">🔑</span>
+        <input type="password" id="password" placeholder="Enter your password" required>
+        <button type="button" class="toggle" onclick="togglePw()">Show</button>
+      </div>
+      <input type="text" style="display:none" tabindex="-1">
+      <div class="err-msg" id="errMsg"><span>⚠</span><span id="errText"></span></div>
+      <div class="btn-row">
+        <button type="button" class="btn-reg" onclick="register()">📝 Register</button>
+        <button type="submit" class="btn-login">🚀 Login</button>
+      </div>
+      <div class="forgot"><a onclick="forgotPassword()">Forgot password?</a></div>
+
+      <div class="help-tip">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>
+          <strong>Can't receive the reset email?</strong> If the Firebase network call fails (auth/network-request-failed), it usually means your network is blocking the identitytoolkit.googleapis.com endpoint. Try the same email after a minute, or use the <code>Register</code> button above to create a fresh account with a new password.
+        </span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+let currentTab='user';
+
+// Animated tab slider
+function moveSlider(){
+  const slider=document.getElementById('tabSlider');
+  const active=document.querySelector('.tab-btn.active');
+  if(active){
+    slider.style.width=active.offsetWidth+'px';
+    slider.style.transform=`translateX(${active.offsetLeft - 4}px)`;
+  }
+}
+window.addEventListener('load',moveSlider);
+window.addEventListener('resize',moveSlider);
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tab==='user'?'userTab':'adminTab').classList.add('active');
+  moveSlider();
+  const hint=document.getElementById('tabHint');
+  hint.textContent=tab==='admin'?'Officer login — only authorized traffic police accepted':'Citizen login for vehicle owners & drivers';
+}
+
+function showErr(msg){
+  const e=document.getElementById('errMsg');
+  document.getElementById('errText').textContent=msg;
+  e.classList.add('show');
+  e.style.animation='none';e.offsetHeight;e.style.animation='shake 0.4s';
+}
+function hideErr(){document.getElementById('errMsg').classList.remove('show');}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='error'?'❌ ':'✅ ')+msg;
+  t.className='toast show'+(type==='error'?' error':'');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+function login(){
+  hideErr();
+  const email=document.getElementById('email').value.trim();
+  const pass=document.getElementById('password').value.trim();
+  if(!email){showErr('Please enter your email address.');return;}
+  if(!pass){showErr('Please enter your password.');return;}
+  const isAdmin=adminEmails.includes(email);
+  if(currentTab==='admin' && !isAdmin){showErr('This email is not registered as an Officer. Switch to the Citizen tab to log in as a user.');return;}
+
+  const btn=document.querySelector('.btn-login');
+  btn.disabled=true;btn.innerHTML='<span class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:18px;height:18px;"></span> Signing in...';
+
+  auth.signInWithEmailAndPassword(email,pass)
+    .then(cred=>{
+      const user=cred.user;
+      if(!user.emailVerified){
+        showErr('Please verify your email first. Check your inbox (and spam) for the verification link.');
+        auth.signOut();
+        btn.disabled=false;btn.innerHTML='🚀 Login';
+        return;
+      }
+      const isAdminLogin=adminEmails.includes(user.email);
+      db.ref('users/'+user.uid+'/isAdmin').set(isAdminLogin).catch(()=>{});
+      toast('Welcome back! Redirecting...');
+      setTimeout(()=>{
+        window.location.href=isAdminLogin?'admin/adminhome.html':'user/userhome.html';
+      },700);
+    })
+    .catch(err=>{
+      btn.disabled=false;btn.innerHTML='🚀 Login';
+      switch(err.code){
+        case 'auth/invalid-credential':
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':showErr('Invalid email or password. Please try again.');break;
+        case 'auth/invalid-email':showErr('Invalid email address format.');break;
+        case 'auth/user-disabled':showErr('This account has been disabled.');break;
+        case 'auth/too-many-requests':showErr('Too many attempts. Please try again later.');break;
+        default:showErr(err.message);
+      }
+    });
+}
+
+function register(){
+  hideErr();
+  const email=document.getElementById('email').value.trim();
+  const pass=document.getElementById('password').value.trim();
+  if(!email){showErr('Please enter your email.');return;}
+  if(pass.length<6){showErr('Password must be at least 6 characters long.');return;}
+  const isAdmin=adminEmails.includes(email);
+
+  const btn=document.querySelector('.btn-reg');
+  btn.disabled=true;btn.innerHTML='<span class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:18px;height:18px;"></span> Creating account...';
+
+  auth.createUserWithEmailAndPassword(email,pass)
+    .then(cred=>{
+      const user=cred.user;
+      return user.sendEmailVerification().then(()=>{
+        db.ref('users/'+user.uid).set({email:email,isAdmin:isAdmin,createdAt:Date.now()});
+        auth.signOut();
+        btn.disabled=false;btn.innerHTML='📝 Register';
+        const who=isAdmin?'Officer':'Citizen';
+        toast('Verification email sent to '+email);
+        alert(who+' registration successful!\n\nA verification email has been sent to:\n'+email+'\n\nPlease click the link in that email before logging in.');
+      });
+    })
+    .catch(err=>{
+      btn.disabled=false;btn.innerHTML='📝 Register';
+      switch(err.code){
+        case 'auth/email-already-in-use':showErr('This email is already registered. Please login.');break;
+        case 'auth/invalid-email':showErr('Invalid email address format.');break;
+        case 'auth/weak-password':showErr('Password must be at least 6 characters.');break;
+        default:showErr(err.message);
+      }
+    });
+}
+
+function forgotPassword(){
+  const email=document.getElementById('email').value.trim();
+  hideErr();
+  if(!email){showErr('Enter your email address above first.');return;}
+  if(!/^[\w.+-]+@[\w-]+\.[\w.-]+$/.test(email)){showErr('Please enter a valid email address.');return;}
+
+  // Indicate progress in the link itself
+  const linkEl=document.querySelector('.forgot a');
+  const originalText=linkEl.textContent;
+  linkEl.textContent='Sending…';
+  linkEl.style.pointerEvents='none';
+
+  auth.sendPasswordResetEmail(email,{url:location.origin+location.pathname})
+    .then(()=>{
+      toast('✅ Password reset link sent to '+email+'. Check your inbox (and spam folder).','ok');
+      linkEl.textContent='Link sent ✓';
+      setTimeout(()=>{linkEl.textContent=originalText;linkEl.style.pointerEvents='';},4000);
+    })
+    .catch(err=>{
+      linkEl.textContent=originalText;
+      linkEl.style.pointerEvents='';
+      switch(err.code){
+        case 'auth/invalid-email':showErr('That email address is not valid.');break;
+        case 'auth/user-not-found':showErr('No account exists with that email.');break;
+        case 'auth/too-many-requests':
+          showErr('Too many reset attempts. Please wait a few minutes and try again.');break;
+        case 'auth/network-request-failed':
+          showErr('Network error. Check your internet connection and try again.');break;
+        case 'auth/missing-email':showErr('Enter your email address above first.');break;
+        default:showErr('Could not send reset email: '+err.message);
+      }
+    });
+}
+
+function togglePw(){
+  const inp=document.getElementById('password');
+  const sp=document.querySelector('.pw-wrap .toggle');
+  if(inp.type==='password'){inp.type='text';sp.textContent='Hide';}
+  else{inp.type='password';sp.textContent='Show';}
+}
+</script>
+</body>
+</html>

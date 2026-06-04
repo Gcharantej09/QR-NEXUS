@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share QR Code · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.share-card{max-width:500px;margin:0 auto;background:#fff;border:1px solid var(--cit-line-2);border-radius:20px;padding:32px;text-align:center;box-shadow:0 8px 28px rgba(255,107,0,0.08);}
+.share-card h2{font-size:1.4rem;margin-bottom:6px;color:var(--cit-text);font-family:var(--font-display);}
+.share-card h2 i{color:var(--cit-saffron);}
+.share-card .sub{color:var(--cit-mute);font-size:0.88rem;margin-bottom:20px;}
+#qrcode{display:flex;justify-content:center;margin:20px 0;}
+#qrcode canvas,#qrcode img{border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.10);padding:12px;background:#fff;}
+.share-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+.share-btn{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:14px 8px;border-radius:14px;border:none;
+  color:#fff;font-size:0.78rem;font-weight:600;cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+  box-shadow:0 4px 12px rgba(0,0,0,0.10);
+}
+.share-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.18);}
+.share-btn i{font-size:1.4rem;}
+.wa{background:linear-gradient(135deg,#25D366,#128C7E);}
+.fb{background:linear-gradient(135deg,#1877F2,#0E5BB8);}
+.tw{background:linear-gradient(135deg,#1DA1F2,#0C85D0);}
+.tg{background:linear-gradient(135deg,#0088CC,#006699);}
+.em{background:linear-gradient(135deg,#FF6B00,#E55A00);}
+.cp{background:linear-gradient(135deg,#6B6357,#3F3A33);}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-share-nodes"></i> Share Your QR</h2>
+        <div class="sub">Send your QR code to family, friends, or save a copy for offline use.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="share-card">
+      <h2><i class="fa-solid fa-qrcode"></i> Share Your QR Code</h2>
+      <p class="sub">Officers can scan this to verify your documents</p>
+      <div id="qrcode"><div class="loading"><span class="spinner"></span> Loading…</div></div>
+      <div class="share-grid">
+        <button class="share-btn wa" onclick="shareOn('whatsapp')"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+        <button class="share-btn fb" onclick="shareOn('facebook')"><i class="fa-brands fa-facebook"></i> Facebook</button>
+        <button class="share-btn tw" onclick="shareOn('twitter')"><i class="fa-brands fa-twitter"></i> Twitter</button>
+        <button class="share-btn tg" onclick="shareOn('telegram')"><i class="fa-brands fa-telegram"></i> Telegram</button>
+        <button class="share-btn em" onclick="shareOn('email')"><i class="fa-solid fa-envelope"></i> Email</button>
+        <button class="share-btn cp" onclick="copyLink()"><i class="fa-solid fa-link"></i> Copy Link</button>
+      </div>
+      <div style="margin-top:18px;"><a class="back-link" href="userhome.html" style="background:transparent;border:none;box-shadow:none;"><i class="fa-solid fa-arrow-left"></i> Back to Home</a></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="citizen-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+let shareLink='https://qr-nexus-81938.web.app/user/qrcode.html';
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  db.ref('users/'+user.uid+'/lastQrId').once('value').then(snap=>{
+    const id=snap.val();
+    if(id)shareLink='https://qr-nexus-81938.web.app/user/qrcode.html?uid='+user.uid+'&id='+id;
+    const div=document.getElementById('qrcode');
+    div.innerHTML='';
+    new QRCode(div,{text:shareLink,width:200,height:200,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+  });
+});
+
+function shareOn(platform){
+  const text='Check my traffic QR code on QR Nexus: ';
+  let url='';
+  switch(platform){
+    case 'whatsapp': url='https://api.whatsapp.com/send?text='+encodeURIComponent(text+shareLink);break;
+    case 'facebook': url='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareLink);break;
+    case 'twitter':  url='https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(shareLink);break;
+    case 'telegram': url='https://t.me/share/url?url='+encodeURIComponent(shareLink)+'&text='+encodeURIComponent(text);break;
+    case 'email':    url='mailto:?subject='+encodeURIComponent('My QR Nexus code')+'&body='+encodeURIComponent(text+shareLink);break;
+  }
+  if(url) window.open(url,'_blank');
+}
+
+function copyLink(){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(shareLink).then(()=>toast('Link copied to clipboard','ok'));
+  }else{
+    const ta=document.createElement('textarea');
+    ta.value=shareLink;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast('Link copied','ok');}catch(e){toast('Copy failed','err');}
+    document.body.removeChild(ta);
+  }
+}
+</script>
+</body>
+</html>

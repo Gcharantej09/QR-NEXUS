@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.profile-wrap{max-width:560px;margin:0 auto;}
+.profile-hero{
+  background:linear-gradient(135deg,#FF6B00,#FF8C42);
+  color:#fff;padding:32px 24px;border-radius:20px 20px 0 0;text-align:center;
+  position:relative;overflow:hidden;
+}
+.profile-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;background:rgba(255,255,255,0.10);border-radius:50%;}
+.avatar-lg{
+  width:90px;height:90px;border-radius:50%;
+  background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:2.2rem;font-weight:700;margin:0 auto 14px;
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,0.3),0 6px 18px rgba(0,0,0,0.15);
+  position:relative;z-index:1;
+}
+.profile-hero h2{font-size:1.4rem;margin-bottom:4px;font-family:var(--font-display);position:relative;z-index:1;}
+.profile-hero .sub{opacity:0.92;font-size:0.88rem;position:relative;z-index:1;}
+.profile-body{background:#fff;border:1px solid var(--cit-line-2);border-top:none;border-radius:0 0 20px 20px;padding:22px;box-shadow:0 8px 28px rgba(0,0,0,0.06);}
+.info-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--cit-bg-2);border-radius:10px;margin-bottom:8px;}
+.info-row .ico{width:36px;height:36px;border-radius:10px;background:rgba(255,107,0,0.12);color:var(--cit-saffron);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.info-row .body{flex:1;min-width:0;}
+.info-row label{font-size:0.7rem;color:var(--cit-mute);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;display:block;margin-bottom:2px;}
+.info-row span{font-size:0.92rem;color:var(--cit-text);font-weight:600;word-break:break-all;}
+
+.score-mini{
+  background:linear-gradient(135deg,#FFF8E8,#FFF);border:1px solid var(--cit-saffron);
+  border-radius:14px;padding:14px 18px;margin:14px 0;
+  display:flex;align-items:center;gap:14px;
+}
+.score-mini .ring{width:60px;height:60px;position:relative;flex-shrink:0;}
+.score-mini .ring svg{transform:rotate(-90deg);width:100%;height:100%;}
+.score-mini .ring .rbg{fill:none;stroke:#FFE5CC;stroke-width:6;}
+.score-mini .ring .rfg{fill:none;stroke:var(--cit-saffron);stroke-width:6;stroke-linecap:round;}
+.score-mini .ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:0.9rem;color:var(--cit-text);}
+.score-mini .body{flex:1;}
+.score-mini .tier{font-size:0.85rem;font-weight:700;}
+.score-mini .desc{font-size:0.75rem;color:var(--cit-mute);margin-top:2px;}
+
+@media(max-width:640px){
+  .profile-hero{padding:24px 18px;}
+  .profile-body{padding:18px;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-user"></i> My Profile</h2>
+        <div class="sub">Your account details, civic score &amp; membership info.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="profile-wrap">
+      <div class="profile-hero">
+        <div class="avatar-lg" id="avatarLg">?</div>
+        <h2 id="displayName">Loading…</h2>
+        <div class="sub" id="displayEmail">…</div>
+      </div>
+      <div class="profile-body">
+
+        <div class="score-mini" id="scoreMini">
+          <div class="ring">
+            <svg viewBox="0 0 100 100">
+              <circle class="rbg" cx="50" cy="50" r="42"/>
+              <circle class="rfg" id="miniRing" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/>
+            </svg>
+            <div class="num" id="miniScore">—</div>
+          </div>
+          <div class="body">
+            <div class="tier" id="miniTier">Computing civic score…</div>
+            <div class="desc">Based on your documents, payments &amp; driving record</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="ico"><i class="fa-solid fa-envelope"></i></div>
+          <div class="body"><label>Email</label><span id="email">Loading…</span></div>
+        </div>
+        <div class="info-row">
+          <div class="ico"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="body"><label>Verification</label><span id="status" style="color:var(--cit-green);">Loading…</span></div>
+        </div>
+        <div class="info-row">
+          <div class="ico"><i class="fa-solid fa-calendar"></i></div>
+          <div class="body"><label>Member Since</label><span id="joined">Loading…</span></div>
+        </div>
+        <div class="info-row">
+          <div class="ico"><i class="fa-solid fa-id-badge"></i></div>
+          <div class="body"><label>User ID</label><span id="uid" style="font-family:var(--font-mono);font-size:0.8rem;">Loading…</span></div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" style="flex:1;" onclick="location.href='userhome.html'"><i class="fa-solid fa-house"></i> Dashboard</button>
+          <button class="btn btn-danger" style="flex:1;" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="citizen-topbar.js"></script>
+<script src="civic-score.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  const name=user.email.split('@')[0];
+  document.getElementById('avatarLg').textContent=name.charAt(0).toUpperCase();
+  document.getElementById('displayName').textContent=name;
+  document.getElementById('displayEmail').textContent=user.email;
+  document.getElementById('email').textContent=user.email;
+  document.getElementById('status').innerHTML=user.emailVerified?'<i class="fa-solid fa-circle-check"></i> Email Verified':'<i class="fa-solid fa-triangle-exclamation"></i> Not Verified';
+  document.getElementById('joined').textContent=new Date(user.metadata.creationTime).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('uid').textContent=user.uid;
+  loadScore(user.uid);
+});
+
+async function loadScore(uid){
+  const r=await CivicScore.compute(uid,db);
+  const C=264;
+  const t0=performance.now(),dur=1300;
+  function step(t){
+    const p=Math.min(1,(t-t0)/dur);
+    const eased=1-Math.pow(1-p,3);
+    document.getElementById('miniRing').style.strokeDashoffset=C-(C*r.score/1000)*eased;
+    document.getElementById('miniScore').textContent=Math.floor(r.score*eased);
+    if(p<1) requestAnimationFrame(step);
+    else document.getElementById('miniScore').textContent=r.score;
+  }
+  requestAnimationFrame(step);
+  document.getElementById('miniTier').innerHTML=`<i class="fa-solid ${r.tier.icon}" style="color:${r.tier.color};"></i> ${r.tier.name} Citizen · ${r.score}/1000`;
+}
+</script>
+</body>
+</html>

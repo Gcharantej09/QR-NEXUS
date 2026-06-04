@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scan History · QR Nexus Officer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="admin.css">
+<style>
+.search-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.search-bar .input{flex:1;min-width:200px;padding-left:42px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238090B8' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='M21 21l-4.3-4.3'/></svg>");background-repeat:no-repeat;background-position:14px center;background-size:18px;}
+
+.user-card{
+  background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+  border:1px solid var(--console-line);border-radius:14px;
+  padding:16px 18px;margin-bottom:12px;cursor:pointer;
+  transition:all var(--t) var(--ease);position:relative;overflow:hidden;
+}
+.user-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background var(--t) var(--ease);}
+.user-card:hover{transform:translateY(-2px);border-color:rgba(0,229,255,0.3);box-shadow:0 12px 28px rgba(0,0,0,0.4);}
+.user-card.open::before{background:linear-gradient(180deg,var(--saffron),var(--neon-cyan));}
+.user-head{display:flex;align-items:center;gap:12px;}
+.user-avatar{
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,var(--saffron) 0%, #000080 100%);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;font-weight:700;flex-shrink:0;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,0.15);
+}
+.user-meta{flex:1;min-width:0;}
+.user-meta .name{font-size:0.98rem;color:#fff;font-weight:600;}
+.user-meta .sub{font-size:0.75rem;color:var(--console-mute);margin-top:2px;word-break:break-all;}
+.scan-pill{background:rgba(0,229,255,0.12);color:var(--neon-cyan);font-size:0.7rem;padding:3px 10px;border-radius:10px;font-weight:700;letter-spacing:0.05em;font-family:var(--font-mono);white-space:nowrap;}
+.chevron{color:var(--console-mute);font-size:1rem;transition:transform 0.2s var(--ease);margin-left:6px;}
+.chevron.open{transform:rotate(180deg);color:var(--neon-cyan);}
+.user-details{display:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--console-line);}
+.user-details.open{display:block;}
+.scan-entry{
+  background:rgba(0,0,0,0.18);border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  border-left:3px solid var(--saffron);
+}
+.scan-time{font-size:0.78rem;color:var(--console-mute);margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.scan-time .badge{font-family:var(--font-mono);color:var(--neon-cyan);font-size:0.72rem;}
+.scan-row{display:flex;gap:14px;flex-wrap:wrap;}
+.scan-row .f{flex:1;min-width:130px;}
+.scan-row .f label{font-size:0.7rem;color:var(--console-mute);display:block;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;font-weight:600;}
+.scan-row .f span{font-size:0.9rem;color:#fff;font-weight:500;word-break:break-all;}
+.doc-link{font-size:0.82rem;color:var(--neon-cyan);text-decoration:none;display:inline-block;margin-top:6px;font-weight:600;}
+.doc-link:hover{text-decoration:underline;}
+.flag-btn{
+  background:rgba(255,176,32,0.12);color:var(--neon-amber);
+  border:1px solid rgba(255,176,32,0.3);
+  padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;
+  transition:all var(--t-fast) var(--ease);white-space:nowrap;
+}
+.flag-btn:hover{background:var(--neon-amber);color:#0A0F25;transform:translateY(-1px);}
+.section-title{font-size:0.78rem;color:var(--console-mute);margin:0 0 12px;text-transform:uppercase;letter-spacing:0.12em;font-weight:700;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';width:4px;height:14px;border-radius:2px;background:linear-gradient(180deg,var(--saffron),var(--neon-cyan));}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="adminTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-clock-rotate-left"></i> Scan History</h2>
+        <div class="sub">Users you've scanned — click a card to see the documents captured at that stop.</div>
+      </div>
+      <a class="back-link" href="adminhome.html"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" class="input" id="searchInput" placeholder="Search by user name or email…" oninput="filterList()">
+      <button class="btn btn-danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Clear All</button>
+    </div>
+
+    <div id="historyList"><div class="loading"><span class="spinner"></span> Loading history…</div></div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="admin-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+
+let allUsers={};
+let currentOfficer=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  if(!adminEmails.includes(user.email)){window.location.href='../index.html';return;}
+  currentOfficer=user;
+  loadHistory(user.uid);
+});
+
+function loadHistory(uid){
+  db.ref('scanHistory/'+uid).once('value').then(snap=>{
+    const list=document.getElementById('historyList');
+    if(!snap.exists()){
+      list.innerHTML='<div class="empty"><i class="fa-solid fa-folder-open"></i>No scan history yet.<br><span style="opacity:0.7;font-size:0.85rem;">Start scanning QR codes to see history here.</span></div>';
+      return;
+    }
+    allUsers={};
+    snap.forEach(userNode=>{
+      const userUid=userNode.key;
+      const scans=[];
+      userNode.forEach(scanNode=>scans.push(scanNode.val()));
+      scans.sort((a,b)=>(b.scannedAt||0)-(a.scannedAt||0));
+      const email=scans[0].userEmail || 'Unknown';
+      allUsers[userUid]={
+        email:email,
+        latestScanAt:scans[0].scannedAt||0,
+        latestReadable:scans[0].scannedAtReadable || new Date(scans[0].scannedAt).toLocaleString(),
+        scanCount:scans.length,
+        scans:scans
+      };
+    });
+    renderList();
+  });
+}
+
+function renderList(){
+  const list=document.getElementById('historyList');
+  const users=Object.entries(allUsers);
+  if(users.length===0){
+    list.innerHTML='<div class="empty"><i class="fa-solid fa-folder-open"></i>No users scanned yet.</div>';
+    return;
+  }
+  users.sort((a,b)=>b[1].latestScanAt - a[1].latestScanAt);
+
+  const html=users.map(([uid,u])=>{
+    const name=(u.email.split('@')[0]) || 'User';
+    const initial=name.charAt(0).toUpperCase();
+    return `
+      <div class="user-card" data-uid="${uid}" data-search="${(name+' '+u.email).toLowerCase()}" onclick="toggleUser('${uid}')">
+        <div class="user-head">
+          <div class="user-avatar">${initial}</div>
+          <div class="user-meta">
+            <div class="name">${escapeHtml(name)}</div>
+            <div class="sub">${escapeHtml(u.email)} · last scan ${escapeHtml(u.latestReadable)}</div>
+          </div>
+          <span class="scan-pill">${u.scanCount} scan${u.scanCount>1?'s':''}</span>
+          <button class="flag-btn" onclick="event.stopPropagation();flagUser('${uid}','${escapeAttr(u.email)}')"><i class="fa-solid fa-flag"></i> Flag</button>
+          <i class="fa-solid fa-chevron-down chevron" id="chev-${uid}"></i>
+        </div>
+        <div class="user-details" id="details-${uid}">
+          ${u.scans.map(s=>`
+            <div class="scan-entry">
+              <div class="scan-time">
+                <i class="fa-regular fa-clock"></i>
+                <span class="badge">${escapeHtml(s.scannedAtReadable || new Date(s.scannedAt).toLocaleString())}</span>
+                ${s.officerLat!=null?`· <i class="fa-solid fa-location-dot" style="color:var(--neon-cyan)"></i> <a href="https://www.google.com/maps?q=${s.officerLat},${s.officerLng}" target="_blank" style="color:var(--neon-cyan);text-decoration:none;">view on map</a>`:''}
+              </div>
+              <div class="scan-row">
+                <div class="f"><label>DL Number</label><span>${escapeHtml(s.dlNumber||'-')}</span></div>
+                <div class="f"><label>RC Number</label><span>${escapeHtml(s.rcNumber||'-')}</span></div>
+                <div class="f"><label>Pollution Cert</label><span>${escapeHtml(s.pollutionNumber||'-')}</span></div>
+                <div class="f"><label>Phone</label><span>${escapeHtml(s.phoneNumber||'-')}</span></div>
+              </div>
+              ${s.fileUrl?`<a href="${s.fileUrl}" target="_blank" class="doc-link"><i class="fa-solid fa-file-arrow-up"></i> View Document</a>`:''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  list.innerHTML=`<div class="section-title">${users.length} user${users.length>1?'s':''} scanned</div>`+html;
+}
+
+function toggleUser(uid){
+  const card=document.querySelector(`.user-card[data-uid="${uid}"]`);
+  const details=document.getElementById('details-'+uid);
+  const chev=document.getElementById('chev-'+uid);
+  const isOpen=details.classList.contains('open');
+  if(isOpen){details.classList.remove('open');card.classList.remove('open');chev.classList.remove('open');}
+  else{details.classList.add('open');card.classList.add('open');chev.classList.add('open');}
+}
+
+function flagUser(uid,email){
+  if(!currentOfficer)return;
+  const reason=prompt('Reason for flagging '+email+':','Suspicious behavior');
+  if(!reason)return;
+  db.ref('watchlist/'+currentOfficer.uid+'/'+uid).set({
+    userUid:uid,userEmail:email,reason:reason,notes:'',
+    flaggedBy:currentOfficer.email,flaggedAt:Date.now(),flaggedAtReadable:new Date().toLocaleString()
+  }).then(()=>toast(email+' added to your watchlist','ok'));
+}
+
+function filterList(){
+  const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
+  document.querySelectorAll('.user-card').forEach(card=>{
+    const txt=card.getAttribute('data-search')||'';
+    card.style.display=(!q || txt.includes(q)) ? '' : 'none';
+  });
+}
+
+function clearHistory(){
+  if(!currentOfficer)return;
+  if(!confirm('Clear ALL scan history? This cannot be undone.'))return;
+  db.ref('scanHistory/'+currentOfficer.uid).remove().then(()=>{
+    allUsers={};
+    document.getElementById('historyList').innerHTML='<div class="empty"><i class="fa-solid fa-folder-open"></i>History cleared.</div>';
+    toast('History cleared','ok');
+  });
+}
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function escapeAttr(s){return String(s||'').replace(/'/g,"\\'");}
+</script>
+</body>
+</html>

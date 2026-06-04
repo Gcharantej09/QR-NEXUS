@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Center · QR Nexus Officer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<style>
+/* ===========================================================
+   OFFICER COMMAND CENTER — government dispatch console look
+   Shared tokens from design-system.css are reused.
+   =========================================================== */
+:root{
+  /* Console-only colors */
+  --console-bg:    #060A1A;
+  --console-bg-2:  #0D1430;
+  --console-panel: #111A3D;
+  --console-line:  rgba(255,255,255,0.08);
+  --console-text:  #DCE3FF;
+  --console-mute:  #8090B8;
+  --saffron:       #FF6B00;
+  --saffron-soft:  rgba(255,107,0,0.18);
+  --neon-green:    #1FB81F;
+  --neon-cyan:     #00E5FF;
+  --neon-amber:    #FFB020;
+  --neon-red:      #FF4757;
+}
+*{scrollbar-width:thin;scrollbar-color:#1F2A55 transparent;}
+*::-webkit-scrollbar{width:6px;height:6px;}
+*::-webkit-scrollbar-thumb{background:#1F2A55;border-radius:6px;}
+
+html,body{background:var(--console-bg);color:var(--console-text);}
+body{
+  font-family:var(--font-body);
+  margin:0;min-height:100vh;
+  background:
+    radial-gradient(ellipse at top right, rgba(255,107,0,0.10), transparent 55%),
+    radial-gradient(ellipse at bottom left, rgba(0,229,255,0.07), transparent 55%),
+    linear-gradient(180deg, #060A1A 0%, #0A0F25 100%);
+  overflow-x:hidden;
+}
+
+/* Faint moving grid background — control room feel */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse at center, #000 30%, transparent 80%);
+  animation:gridDrift 30s linear infinite;
+}
+@keyframes gridDrift{
+  from{background-position:0 0,0 0;}
+  to{background-position:48px 48px,48px 48px;}
+}
+
+/* Floating dust particles */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(2px 2px at 12% 24%, rgba(0,229,255,0.45), transparent 60%),
+    radial-gradient(2px 2px at 78% 18%, rgba(255,176,32,0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 38% 78%, rgba(31,184,31,0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 88% 64%, rgba(255,107,0,0.4), transparent 60%),
+    radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.25), transparent 60%);
+  background-size:600px 600px;
+  animation:dustFloat 22s ease-in-out infinite alternate;
+}
+@keyframes dustFloat{from{transform:translate3d(0,0,0);}to{transform:translate3d(40px,-30px,0);}}
+
+/* ============ LAYOUT ============ */
+.console{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  min-height:100vh;
+  position:relative;z-index:1;
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  background:linear-gradient(180deg, #0B1230 0%, #060A1A 100%);
+  border-right:1px solid var(--console-line);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;z-index:10;
+}
+.sidebar::before{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:1px;
+  background:linear-gradient(180deg, transparent, rgba(255,107,0,0.5) 30%, rgba(0,229,255,0.5) 70%, transparent);
+  opacity:0.6;
+}
+
+.brand{
+  padding:22px 20px 18px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--console-line);
+}
+.brand-mark{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg, #FF6B00 0%, #000080 100%);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:1.25rem;position:relative;
+  box-shadow:0 0 0 4px rgba(255,107,0,0.12), 0 8px 20px rgba(0,0,128,0.4);
+}
+.brand-mark::after{
+  content:'';position:absolute;inset:-3px;border-radius:14px;
+  border:1.5px solid rgba(255,107,0,0.4);
+  animation:brandPulse 3s var(--ease) infinite;
+}
+@keyframes brandPulse{
+  0%,100%{transform:scale(1);opacity:0.6;}
+  50%{transform:scale(1.08);opacity:0.2;}
+}
+.brand-text h1{font-size:1rem;margin:0;line-height:1.1;color:#fff;font-family:var(--font-display);}
+.brand-text .sub{font-size:0.65rem;color:var(--console-mute);letter-spacing:0.18em;text-transform:uppercase;margin-top:2px;}
+
+/* Officer ID card */
+.id-card{
+  margin:16px 16px 0;
+  padding:16px;border-radius:16px;
+  background:linear-gradient(135deg, rgba(255,107,0,0.10), rgba(0,229,255,0.08));
+  border:1px solid rgba(255,107,0,0.25);
+  position:relative;overflow:hidden;
+}
+.id-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, #FF6B00, #00E5FF, #1FB81F);
+  background-size:200% 100%;
+  animation:idBar 4s linear infinite;
+}
+@keyframes idBar{from{background-position:0 0;}to{background-position:200% 0;}}
+.id-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.id-avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,#FF6B00,#000080);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:1.1rem;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,0.2);
+}
+.id-info{flex:1;min-width:0;}
+.id-info .name{font-size:0.88rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.id-info .badge{font-size:0.62rem;color:var(--neon-cyan);letter-spacing:0.1em;text-transform:uppercase;}
+.id-info .email{font-size:0.7rem;color:var(--console-mute);margin-top:2px;word-break:break-all;}
+
+/* Duty toggle */
+.duty-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding-top:10px;border-top:1px dashed rgba(255,255,255,0.08);
+}
+.duty-label{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--console-mute);font-weight:600;letter-spacing:0.05em;}
+.duty-dot{width:8px;height:8px;border-radius:50%;background:var(--neon-green);box-shadow:0 0 0 3px rgba(31,184,31,0.2);animation:pulse 1.6s infinite;}
+.duty-dot.off{background:var(--neon-red);box-shadow:0 0 0 3px rgba(255,71,87,0.2);animation:none;}
+
+/* Toggle switch */
+.switch{position:relative;width:42px;height:22px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.switch .slider{
+  position:absolute;inset:0;background:rgba(255,255,255,0.12);
+  border-radius:22px;cursor:pointer;transition:0.3s var(--ease);
+}
+.switch .slider::before{
+  content:'';position:absolute;left:3px;top:3px;
+  width:16px;height:16px;background:#fff;border-radius:50%;
+  transition:0.3s var(--ease-spring);
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+.switch input:checked + .slider{background:var(--neon-green);}
+.switch input:checked + .slider::before{transform:translateX(20px);}
+
+/* Nav */
+.nav{padding:18px 12px;flex:1;overflow-y:auto;}
+.nav-label{font-size:0.62rem;letter-spacing:0.2em;color:var(--console-mute);text-transform:uppercase;padding:0 12px;margin:14px 0 6px;font-weight:700;}
+.nav a{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 12px;border-radius:12px;
+  color:var(--console-text);text-decoration:none;
+  font-size:0.88rem;font-weight:500;position:relative;
+  transition:all var(--t-fast) var(--ease);
+  border:1px solid transparent;
+}
+.nav a i{width:20px;text-align:center;font-size:1rem;color:var(--console-mute);transition:color var(--t-fast) var(--ease);}
+.nav a:hover{background:rgba(255,255,255,0.04);color:#fff;border-color:rgba(255,255,255,0.06);}
+.nav a:hover i{color:var(--neon-cyan);}
+.nav a.active{
+  background:linear-gradient(90deg, rgba(255,107,0,0.18), rgba(255,107,0,0.04));
+  color:#fff;border-color:rgba(255,107,0,0.25);
+  box-shadow:inset 2px 0 0 var(--saffron);
+}
+.nav a.active i{color:var(--saffron);}
+.nav a .pill{margin-left:auto;font-size:0.62rem;background:var(--saffron);color:#fff;padding:1px 7px;border-radius:10px;font-weight:700;}
+
+/* Sidebar footer (utility cluster — Watchlist + Settings) */
+.side-footer{
+  padding:14px;border-top:1px solid var(--console-line);
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.utility-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  padding:10px 6px;border-radius:12px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--console-line);
+  color:var(--console-mute);font-size:0.7rem;font-weight:600;
+  cursor:pointer;text-decoration:none;
+  transition:all var(--t-fast) var(--ease);position:relative;
+}
+.utility-btn i{font-size:1.1rem;}
+.utility-btn:hover{background:rgba(0,229,255,0.10);color:var(--neon-cyan);border-color:rgba(0,229,255,0.3);transform:translateY(-2px);}
+.utility-btn.alert:hover{background:rgba(255,71,87,0.10);color:var(--neon-red);border-color:rgba(255,71,87,0.3);}
+.utility-btn .count{
+  position:absolute;top:6px;right:8px;
+  background:var(--neon-red);color:#fff;font-size:0.55rem;font-weight:700;
+  padding:1px 5px;border-radius:8px;display:none;
+}
+
+/* ============ MAIN ============ */
+.main{display:flex;flex-direction:column;min-width:0;}
+
+/* Top strip — alert ticker + clock + shift timer */
+.topstrip{
+  display:flex;align-items:center;gap:16px;
+  padding:12px 24px;
+  background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--console-line);
+  backdrop-filter:blur(10px);
+}
+.ticker{
+  flex:1;overflow:hidden;position:relative;height:24px;
+  mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.ticker-track{
+  display:flex;gap:48px;white-space:nowrap;
+  position:absolute;top:0;left:0;height:100%;
+  align-items:center;
+  animation:tickerScroll 45s linear infinite;
+  font-size:0.82rem;color:var(--console-mute);
+}
+.ticker-track span i{color:var(--saffron);margin-right:6px;}
+.ticker-track .good i{color:var(--neon-green);}
+.ticker-track .warn i{color:var(--neon-amber);}
+@keyframes tickerScroll{
+  from{transform:translateX(0);}to{transform:translateX(-50%);}
+}
+
+.clock-box{
+  display:flex;align-items:center;gap:14px;
+  font-family:var(--font-mono);
+}
+.clock-time{font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:0.04em;}
+.clock-date{font-size:0.7rem;color:var(--console-mute);text-transform:uppercase;letter-spacing:0.1em;}
+
+.shift-box{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 12px;border-radius:10px;
+  background:rgba(31,184,31,0.10);border:1px solid rgba(31,184,31,0.25);
+  font-size:0.78rem;font-weight:600;color:var(--neon-green);
+}
+.shift-box i{animation:pulse 1.6s infinite;}
+
+/* ============ CONTENT ============ */
+.content{padding:24px 24px 80px;}
+
+/* Hero band */
+.hero{
+  background:linear-gradient(135deg, rgba(0,0,128,0.55) 0%, rgba(13,20,48,0.7) 60%, rgba(255,107,0,0.18) 100%);
+  border:1px solid rgba(0,229,255,0.18);
+  border-radius:20px;padding:22px 26px;
+  position:relative;overflow:hidden;
+  margin-bottom:22px;
+}
+.hero::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, transparent, #FF6B00 30%, #00E5FF 60%, transparent);
+  background-size:200% 100%;animation:heroSweep 6s linear infinite;
+}
+@keyframes heroSweep{from{background-position:200% 0;}to{background-position:-200% 0;}}
+.hero::after{
+  content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;
+  background:radial-gradient(circle, rgba(255,107,0,0.18), transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:1;}
+.hero h2{font-size:1.55rem;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:6px;font-family:var(--font-display);}
+.hero .sub{color:var(--console-mute);font-size:0.92rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.hero .sub .live{color:var(--neon-green);display:flex;align-items:center;gap:6px;font-weight:600;}
+.hero .sub .live::before{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--neon-green);
+  box-shadow:0 0 0 4px rgba(31,184,31,0.25);
+  animation:pulse 1.6s infinite;
+}
+
+/* Radar / performance ring */
+.radar{
+  width:130px;height:130px;position:relative;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.radar svg{position:absolute;inset:0;transform:rotate(-90deg);}
+.radar .ring-bg{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:8;}
+.radar .ring-fg{fill:none;stroke:url(#radGrad);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.2s var(--ease-out);}
+.radar .sweep{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg, transparent 0deg, rgba(0,229,255,0.25) 50deg, transparent 90deg);
+  animation:sweep 4s linear infinite;
+  mask:radial-gradient(circle, transparent 38%, #000 40%);
+  -webkit-mask:radial-gradient(circle, transparent 38%, #000 40%);
+}
+@keyframes sweep{to{transform:rotate(360deg);}}
+.radar .center{text-align:center;z-index:2;}
+.radar .center .pct{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:#fff;line-height:1;}
+.radar .center .lbl{font-size:0.6rem;color:var(--console-mute);text-transform:uppercase;letter-spacing:0.12em;margin-top:4px;}
+
+/* Stat grid */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;
+}
+.stat{
+  position:relative;padding:18px 18px 16px;border-radius:16px;
+  background:linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  border:1px solid var(--console-line);overflow:hidden;
+  transition:all var(--t) var(--ease);
+}
+.stat:hover{transform:translateY(-3px);border-color:rgba(0,229,255,0.3);box-shadow:0 12px 28px rgba(0,0,0,0.4);}
+.stat::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--accent-bar, var(--neon-cyan));
+}
+.stat .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.stat .ico{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,229,255,0.10);color:var(--neon-cyan);font-size:1rem;
+}
+.stat.green .ico{background:rgba(31,184,31,0.10);color:var(--neon-green);}
+.stat.amber .ico{background:rgba(255,176,32,0.10);color:var(--neon-amber);}
+.stat.red .ico{background:rgba(255,71,87,0.10);color:var(--neon-red);}
+.stat.saffron .ico{background:var(--saffron-soft);color:var(--saffron);}
+.stat .num{font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:#fff;line-height:1;}
+.stat .label{font-size:0.7rem;color:var(--console-mute);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;font-weight:600;}
+.stat .trend{font-size:0.65rem;margin-top:8px;display:flex;align-items:center;gap:4px;}
+.stat .trend.up{color:var(--neon-green);}
+.stat .trend.down{color:var(--neon-red);}
+
+/* Section title */
+.section-title{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:8px 0 14px;gap:12px;
+}
+.section-title h3{
+  font-size:1.05rem;display:flex;align-items:center;gap:10px;
+  color:#fff;font-family:var(--font-display);font-weight:600;
+}
+.section-title h3::before{
+  content:'';width:4px;height:18px;border-radius:2px;
+  background:linear-gradient(180deg, var(--saffron), var(--neon-cyan));
+}
+.section-title .meta{font-size:0.75rem;color:var(--console-mute);}
+
+/* ============ PRIMARY ACTION GRID (front page) ============ */
+.ops-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;
+}
+.op{
+  position:relative;padding:24px 22px;border-radius:18px;
+  background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+  border:1px solid var(--console-line);cursor:pointer;
+  text-decoration:none;color:inherit;
+  overflow:hidden;
+  transition:all var(--t) var(--ease);
+}
+.op::before{
+  content:'';position:absolute;inset:0;border-radius:18px;padding:1px;
+  background:linear-gradient(135deg, transparent 40%, var(--accent-glow, rgba(0,229,255,0.4)) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:0;transition:opacity var(--t) var(--ease);pointer-events:none;
+}
+.op:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.12);box-shadow:0 16px 36px rgba(0,0,0,0.5);}
+.op:hover::before{opacity:1;}
+.op::after{
+  content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;
+  background:var(--ripple,#fff);transform:translate(-50%,-50%);opacity:0;
+  pointer-events:none;
+}
+.op:active::after{width:300px;height:300px;opacity:0.18;transition:width 0.5s,height 0.5s,opacity 0.5s;}
+.op .ico-wrap{
+  width:64px;height:64px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.7rem;color:#fff;margin-bottom:14px;
+  background:linear-gradient(135deg, var(--accent-glow, var(--saffron)), transparent);
+  border:1px solid var(--accent-glow, var(--saffron));
+  position:relative;
+  box-shadow:0 8px 18px rgba(0,0,0,0.3);
+}
+.op .ico-wrap::after{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(135deg, var(--accent-glow, var(--saffron)), transparent);
+  opacity:0.4;filter:blur(14px);z-index:-1;
+}
+.op.primary{--accent-glow:#FF6B00;}
+.op.primary .ico-wrap{background:linear-gradient(135deg, #FF6B00, #000080);}
+.op.scan{--accent-glow:#00E5FF;}
+.op.scan .ico-wrap{background:linear-gradient(135deg, #00E5FF, #000080);}
+.op.lookup{--accent-glow:#1FB81F;}
+.op.lookup .ico-wrap{background:linear-gradient(135deg, #1FB81F, #000080);}
+.op h4{font-size:1.05rem;color:#fff;margin-bottom:4px;font-family:var(--font-display);}
+.op p{font-size:0.78rem;color:var(--console-mute);line-height:1.45;margin:0 0 12px;}
+.op .go{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:0.72rem;color:var(--accent-glow, var(--neon-cyan));
+  text-transform:uppercase;letter-spacing:0.12em;font-weight:700;
+  transition:gap var(--t-fast) var(--ease);
+}
+.op:hover .go{gap:10px;}
+
+.op .corner{
+  position:absolute;top:14px;right:14px;
+  font-size:0.6rem;font-family:var(--font-mono);font-weight:700;
+  color:var(--neon-cyan);background:rgba(0,229,255,0.10);
+  padding:3px 8px;border-radius:8px;letter-spacing:0.1em;
+}
+.op.primary .corner{color:var(--saffron);background:var(--saffron-soft);}
+
+/* ============ TWO-COLUMN: activity + heatmap ============ */
+.dual{
+  display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:24px;
+}
+.panel{
+  background:linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  border:1px solid var(--console-line);border-radius:16px;
+  padding:20px;position:relative;overflow:hidden;
+}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.panel-head h4{font-size:0.95rem;color:#fff;display:flex;align-items:center;gap:8px;font-family:var(--font-display);}
+.panel-head h4 i{color:var(--saffron);}
+.panel-head .badge{font-size:0.62rem;background:rgba(31,184,31,0.15);color:var(--neon-green);padding:3px 8px;border-radius:8px;font-weight:700;letter-spacing:0.1em;}
+
+/* Activity feed */
+.feed{list-style:none;padding:0;margin:0;max-height:320px;overflow-y:auto;}
+.feed li{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:11px 0;border-bottom:1px dashed rgba(255,255,255,0.06);
+  animation:feedIn 0.4s var(--ease-out) both;
+}
+@keyframes feedIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
+.feed li:last-child{border-bottom:none;}
+.feed .dot{
+  width:32px;height:32px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:0.9rem;
+}
+.feed .dot.scan{background:rgba(0,229,255,0.12);color:var(--neon-cyan);}
+.feed .dot.challan{background:rgba(255,71,87,0.12);color:var(--neon-red);}
+.feed .dot.verify{background:rgba(31,184,31,0.12);color:var(--neon-green);}
+.feed .dot.watch{background:rgba(255,176,32,0.12);color:var(--neon-amber);}
+.feed .body{flex:1;min-width:0;}
+.feed .line{font-size:0.85rem;color:#fff;font-weight:500;line-height:1.3;}
+.feed .meta{font-size:0.7rem;color:var(--console-mute);margin-top:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.feed .time{font-family:var(--font-mono);color:var(--neon-cyan);font-size:0.7rem;}
+.feed-empty{text-align:center;padding:32px 12px;color:var(--console-mute);font-size:0.85rem;}
+.feed-empty i{font-size:2rem;display:block;margin-bottom:8px;opacity:0.4;}
+
+/* Heatmap */
+.heatmap{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:8px;}
+.heatcell{
+  aspect-ratio:1;border-radius:4px;background:rgba(255,255,255,0.05);
+  position:relative;cursor:pointer;transition:all var(--t-fast) var(--ease);
+}
+.heatcell:hover{transform:scale(1.2);z-index:2;box-shadow:0 0 0 2px rgba(255,255,255,0.3);}
+.heatcell.l1{background:rgba(0,229,255,0.18);}
+.heatcell.l2{background:rgba(0,229,255,0.38);}
+.heatcell.l3{background:rgba(255,107,0,0.42);}
+.heatcell.l4{background:rgba(255,107,0,0.78);box-shadow:0 0 8px rgba(255,107,0,0.4);}
+.heat-legend{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:0.65rem;color:var(--console-mute);text-transform:uppercase;letter-spacing:0.12em;}
+.heat-legend .scale{display:flex;gap:4px;align-items:center;}
+.heat-legend .scale i{width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,0.05);display:block;}
+.heat-legend .scale i.l1{background:rgba(0,229,255,0.18);}
+.heat-legend .scale i.l2{background:rgba(0,229,255,0.38);}
+.heat-legend .scale i.l3{background:rgba(255,107,0,0.42);}
+.heat-legend .scale i.l4{background:rgba(255,107,0,0.78);}
+
+/* Quick palette (command input) */
+.palette{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:12px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--console-line);
+  margin-bottom:16px;
+}
+.palette i{color:var(--console-mute);font-size:1rem;}
+.palette input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:#fff;font-size:0.88rem;font-family:var(--font-body);
+}
+.palette input::placeholder{color:var(--console-mute);}
+.palette .kbd{
+  font-family:var(--font-mono);font-size:0.65rem;
+  background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;
+  color:var(--console-mute);border:1px solid rgba(255,255,255,0.08);
+}
+
+/* Logout footer */
+.logout{
+  text-align:center;margin-top:30px;
+}
+.logout button{
+  padding:10px 28px;border:1px solid rgba(255,71,87,0.4);
+  border-radius:12px;background:rgba(255,71,87,0.08);
+  color:var(--neon-red);font-size:0.85rem;font-weight:600;
+  cursor:pointer;font-family:var(--font-body);
+  transition:all var(--t-fast) var(--ease);
+}
+.logout button:hover{background:var(--neon-red);color:#fff;transform:translateY(-1px);box-shadow:0 8px 18px rgba(255,71,87,0.3);}
+
+/* Responsive */
+@media(max-width:1100px){
+  .dual{grid-template-columns:1fr;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .ops-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:780px){
+  .console{grid-template-columns:1fr;}
+  .sidebar{position:relative;height:auto;}
+  .hero{flex-direction:column;text-align:center;}
+  .radar{margin:0 auto;}
+  .ops-grid{grid-template-columns:1fr;}
+  .topstrip{flex-wrap:wrap;gap:8px;}
+  .ticker{order:3;flex:0 0 100%;}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr 1fr;}
+  .content{padding:18px 14px 80px;}
+  .topstrip{padding:10px 14px;}
+}
+
+/* Toast */
+.toast{
+  position:fixed;top:20px;right:20px;z-index:300;
+  padding:14px 20px;border-radius:12px;font-size:0.88rem;font-weight:500;
+  background:rgba(13,20,48,0.95);backdrop-filter:blur(12px);
+  border:1px solid rgba(0,229,255,0.3);color:#fff;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 12px 32px rgba(0,0,0,0.5);
+  transform:translateX(140%);transition:transform 0.4s var(--ease-spring);
+}
+.toast.show{transform:translateX(0);}
+.toast.ok{border-color:rgba(31,184,31,0.4);}
+.toast.err{border-color:rgba(255,71,87,0.4);}
+
+/* Station select (in-station pill dropdown) */
+.station-select{
+  padding:6px 12px;border-radius:10px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.06);color:#fff;
+  font-size:0.8rem;cursor:pointer;outline:none;font-family:var(--font-body);
+}
+.station-select option{background:#0B1230;color:#fff;}
+</style>
+</head>
+<body>
+
+<div class="console">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="brand-text">
+        <h1>QR Nexus</h1>
+        <div class="sub">Command Center</div>
+      </div>
+    </div>
+
+    <!-- Officer ID + duty toggle -->
+    <div class="id-card">
+      <div class="id-head">
+        <div class="id-avatar" id="idAvatar">?</div>
+        <div class="id-info">
+          <div class="name" id="idName">Loading...</div>
+          <div class="badge">● AUTHORIZED OFFICER</div>
+          <div class="email" id="idEmail">...</div>
+        </div>
+      </div>
+      <div class="duty-row">
+        <div class="duty-label"><span class="duty-dot" id="dutyDot"></span> ON DUTY</div>
+        <label class="switch">
+          <input type="checkbox" id="dutyToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Nav (only operations on the front page) -->
+    <nav class="nav">
+      <div class="nav-label">Operations</div>
+      <a href="adminhome.html" class="active"><i class="fa-solid fa-gauge-high"></i> Command Center</a>
+      <a href="qr_code_scanner.html"><i class="fa-solid fa-camera"></i> Scan QR</a>
+      <a href="scan_history.html"><i class="fa-solid fa-clock-rotate-left"></i> Scan History</a>
+      <a href="docuverification.html"><i class="fa-solid fa-magnifying-glass"></i> Verify User</a>
+      <a href="challans.html"><i class="fa-solid fa-receipt"></i> Challan Records</a>
+
+      <div class="nav-label">Account</div>
+      <a href="javascript:void(0)" id="navLogout" style="color:var(--neon-red);">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </a>
+    </nav>
+
+    <!-- Utility cluster (Watchlist + Settings live here, off the front page) -->
+    <div class="side-footer">
+      <a class="utility-btn alert" href="watchlist.html" title="Watchlist">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Watchlist
+        <span class="count" id="watchlistCountPill">0</span>
+      </a>
+      <a class="utility-btn" href="settings.html" title="Settings">
+        <i class="fa-solid fa-sliders"></i>
+        Settings
+      </a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- Top strip: ticker + clock + shift -->
+    <div class="topstrip">
+      <div class="ticker">
+        <div class="ticker-track" id="ticker">
+          <span><i class="fa-solid fa-circle-info"></i> QR Nexus is an official Government of India traffic system</span>
+          <span class="good"><i class="fa-solid fa-circle-check"></i> All systems operational</span>
+          <span class="warn"><i class="fa-solid fa-triangle-exclamation"></i> Always verify document ownership before issuing a challan</span>
+          <span><i class="fa-solid fa-shield-halved"></i> Encrypted via Firebase · 256-bit</span>
+          <span class="good"><i class="fa-solid fa-bolt"></i> Real-time sync with citizen database</span>
+          <!-- duplicate for seamless loop -->
+          <span><i class="fa-solid fa-circle-info"></i> QR Nexus is an official Government of India traffic system</span>
+          <span class="good"><i class="fa-solid fa-circle-check"></i> All systems operational</span>
+          <span class="warn"><i class="fa-solid fa-triangle-exclamation"></i> Always verify document ownership before issuing a challan</span>
+          <span><i class="fa-solid fa-shield-halved"></i> Encrypted via Firebase · 256-bit</span>
+          <span class="good"><i class="fa-solid fa-bolt"></i> Real-time sync with citizen database</span>
+        </div>
+      </div>
+      <div class="clock-box">
+        <div>
+          <div class="clock-time" id="clockTime">--:--:--</div>
+          <div class="clock-date" id="clockDate">--</div>
+        </div>
+      </div>
+      <div class="shift-box">
+        <i class="fa-solid fa-circle"></i>
+        <span>SHIFT</span>
+        <span id="shiftTimer">00:00:00</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Hero band -->
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <h2><i class="fa-solid fa-shield"></i> Officer Command Center</h2>
+            <div class="sub">
+              <span class="live">Live</span>
+              <span>·</span>
+              <span id="stationLine">Setting up your station…</span>
+              <select class="station-select" id="stationSelect" onchange="saveStation()" style="display:none;margin-left:6px;">
+                <option value="">Select Station / Division…</option>
+                <optgroup label="Andhra Pradesh">
+                  <option>Visakhapatnam Central</option><option>Vijayawada</option><option>Guntur</option>
+                  <option>Tirupati</option><option>Nellore</option><option>Kakinada</option>
+                </optgroup>
+                <optgroup label="Telangana">
+                  <option>Hyderabad Central</option><option>Hyderabad Cyberabad</option>
+                  <option>Warangal</option><option>Karimnagar</option><option>Khammam</option>
+                </optgroup>
+                <optgroup label="Tamil Nadu">
+                  <option>Chennai Central</option><option>Chennai Traffic South</option>
+                  <option>Coimbatore</option><option>Madurai</option><option>Salem</option>
+                </optgroup>
+                <optgroup label="Karnataka">
+                  <option>Bengaluru Central</option><option>Bengaluru East</option>
+                  <option>Mysuru</option><option>Mangaluru</option>
+                </optgroup>
+                <optgroup label="Maharashtra">
+                  <option>Mumbai Central</option><option>Mumbai Highway</option>
+                  <option>Pune</option><option>Nagpur</option><option>Nashik</option>
+                </optgroup>
+                <optgroup label="Delhi">
+                  <option>Delhi Central</option><option>Delhi South</option>
+                  <option>Delhi North</option><option>Delhi East</option>
+                </optgroup>
+                <optgroup label="Other States">
+                  <option>Kolkata</option><option>Lucknow</option><option>Jaipur</option>
+                  <option>Ahmedabad</option><option>Bhopal</option><option>Patna</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          <!-- Performance ring (radar style) -->
+          <div class="radar">
+            <div class="sweep"></div>
+            <svg viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="radGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FF6B00"/>
+                  <stop offset="100%" stop-color="#00E5FF"/>
+                </linearGradient>
+              </defs>
+              <circle class="ring-bg" cx="60" cy="60" r="50"/>
+              <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="50"
+                      stroke-dasharray="314" stroke-dashoffset="314"/>
+            </svg>
+            <div class="center">
+              <div class="pct" id="ringPct">0%</div>
+              <div class="lbl">Shift Goal</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick command palette -->
+      <div class="palette">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" id="palette" placeholder="Quick search — vehicle number, email, or press a command…" autocomplete="off">
+        <span class="kbd">/</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat green" style="--accent-bar:#1FB81F;">
+          <div class="head">
+            <div class="ico"><i class="fa-solid fa-qrcode"></i></div>
+            <span class="badge" style="background:rgba(31,184,31,0.15);color:#1FB81F;font-size:0.62rem;padding:2px 8px;border-radius:8px;font-weight:700;">TODAY</span>
+          </div>
+          <div class="num" data-target="0" id="scansToday">0</div>
+          <div class="label">Scans Today</div>
+          <div class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> <span>Live counter</span></div>
+        </div>
+        <div class="stat saffron" style="--accent-bar:#FF6B00;">
+          <div class="head">
+            <div class="ico"><i class="fa-solid fa-users"></i></div>
+          </div>
+          <div class="num" data-target="0" id="usersScanned">0</div>
+          <div class="label">Users Verified</div>
+          <div class="trend up"><i class="fa-solid fa-database"></i> <span>From Firebase</span></div>
+        </div>
+        <div class="stat red" style="--accent-bar:#FF4757;">
+          <div class="head">
+            <div class="ico"><i class="fa-solid fa-receipt"></i></div>
+          </div>
+          <div class="num" data-target="0" id="challansIssued">0</div>
+          <div class="label">Challans Issued</div>
+          <div class="trend up"><i class="fa-solid fa-gavel"></i> <span>By you</span></div>
+        </div>
+        <div class="stat amber" style="--accent-bar:#FFB020;">
+          <div class="head">
+            <div class="ico"><i class="fa-solid fa-user-secret"></i></div>
+          </div>
+          <div class="num" data-target="0" id="watchlistCount">0</div>
+          <div class="label">On Watchlist</div>
+          <div class="trend" style="color:var(--neon-amber);"><i class="fa-solid fa-eye"></i> <span>Tracked</span></div>
+        </div>
+      </div>
+
+      <!-- PRIMARY OPERATIONS (front page) -->
+      <div class="section-title">
+        <h3>Quick Operations</h3>
+        <div class="meta">3 main actions · click to begin</div>
+      </div>
+
+      <div class="ops-grid">
+        <a class="op scan" href="qr_code_scanner.html" style="--ripple:#00E5FF;">
+          <span class="corner">PRIMARY</span>
+          <div class="ico-wrap"><i class="fa-solid fa-camera-retro"></i></div>
+          <h4>Scan QR Code</h4>
+          <p>Verify a citizen's traffic documents in seconds — instant lookup from the database.</p>
+          <span class="go">Open scanner <i class="fa-solid fa-arrow-right"></i></span>
+        </a>
+        <a class="op lookup" href="scan_history.html" style="--ripple:#1FB81F;">
+          <span class="corner">RECORDS</span>
+          <div class="ico-wrap"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          <h4>Scan History</h4>
+          <p>All your previous scans — filter by date, vehicle, or outcome.</p>
+          <span class="go">View timeline <i class="fa-solid fa-arrow-right"></i></span>
+        </a>
+        <a class="op primary" href="docuverification.html" style="--ripple:#FF6B00;">
+          <span class="corner">LOOKUP</span>
+          <div class="ico-wrap"><i class="fa-solid fa-id-card-clip"></i></div>
+          <h4>Verify User</h4>
+          <p>Look up a citizen by email address or document ID without a QR scan.</p>
+          <span class="go">Start lookup <i class="fa-solid fa-arrow-right"></i></span>
+        </a>
+      </div>
+
+      <!-- TWO COLUMN: Activity feed + Heatmap -->
+      <div class="dual">
+        <div class="panel">
+          <div class="panel-head">
+            <h4><i class="fa-solid fa-wave-square"></i> Live Activity Feed</h4>
+            <span class="badge" id="feedBadge">UPDATING</span>
+          </div>
+          <ul class="feed" id="feed">
+            <li class="feed-empty">
+              <i class="fa-solid fa-satellite-dish"></i>
+              Waiting for live activity from your station…
+            </li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h4><i class="fa-solid fa-chart-line"></i> 12-Hour Activity</h4>
+            <span class="badge" style="background:rgba(0,229,255,0.15);color:var(--neon-cyan);">HEATMAP</span>
+          </div>
+          <div class="heatmap" id="heatmap"></div>
+          <div class="heat-legend">
+            <span>00:00 → 12:00</span>
+            <div class="scale">Less
+              <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="logout">
+        <button onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> End Shift & Sign Out</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+
+let currentOfficer=null;
+let watchlistN=0;
+let shiftStartTs=Date.now();
+let dutyOn=true;
+
+/* ===================== AUTH ===================== */
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  if(!adminEmails.includes(user.email)){window.location.href='../index.html';return;}
+  currentOfficer=user;
+
+  const uname=user.email.split('@')[0];
+  document.getElementById('idName').textContent=uname;
+  document.getElementById('idAvatar').textContent=uname.charAt(0).toUpperCase();
+  document.getElementById('idEmail').textContent=user.email;
+
+  loadStation();
+  loadStats();
+  loadFeed();
+  buildHeatmap();
+  animateRing();
+});
+
+/* ===================== STATION ===================== */
+function loadStation(){
+  db.ref('officers/'+currentOfficer.uid+'/station').once('value').then(snap=>{
+    const st=snap.val();
+    if(st){
+      document.getElementById('stationLine').textContent='📍 Station: '+st;
+    }else{
+      document.getElementById('stationLine').textContent='⚠ Please select your station';
+      document.getElementById('stationSelect').style.display='inline-block';
+    }
+  });
+}
+function saveStation(){
+  const st=document.getElementById('stationSelect').value;
+  if(!st)return;
+  db.ref('officers/'+currentOfficer.uid).set({email:currentOfficer.email,station:st,updatedAt:Date.now()}).then(()=>{
+    document.getElementById('stationLine').textContent='📍 Station: '+st;
+    document.getElementById('stationSelect').style.display='none';
+    toast('Station saved: '+st,'ok');
+  });
+}
+
+/* ===================== STATS (with count-up animation) ===================== */
+function loadStats(){
+  const uid=currentOfficer.uid;
+  db.ref('scanHistory/'+uid).once('value').then(snap=>{
+    const today=new Date();today.setHours(0,0,0,0);
+    let scansToday=0, usersScanned=0;
+    snap.forEach(userNode=>{
+      usersScanned++;
+      userNode.forEach(scanNode=>{
+        const ts=scanNode.val().scannedAt||0;
+        if(ts>=today.getTime()) scansToday++;
+      });
+    });
+    animateCount('scansToday',scansToday);
+    animateCount('usersScanned',usersScanned);
+  });
+
+  db.ref('watchlist/'+uid).on('value',snap=>{
+    const n=snap.numChildren();
+    watchlistN=n;
+    animateCount('watchlistCount',n);
+    const pill=document.getElementById('watchlistCountPill');
+    if(n>0){pill.textContent=n;pill.style.display='block';}
+  });
+
+  db.ref('challans').once('value').then(snap=>{
+    let count=0;
+    snap.forEach(userNode=>{
+      userNode.forEach(c=>{
+        if(c.val().issuedBy===currentOfficer.email) count++;
+      });
+    });
+    animateCount('challansIssued',count);
+  });
+}
+
+function animateCount(id,target){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const start=parseInt(el.textContent)||0;
+  const dur=900;
+  const t0=performance.now();
+  function step(t){
+    const p=Math.min(1,(t-t0)/dur);
+    const eased=1-Math.pow(1-p,3);
+    el.textContent=Math.floor(start+(target-start)*eased);
+    if(p<1) requestAnimationFrame(step);
+    else el.textContent=target;
+  }
+  requestAnimationFrame(step);
+}
+
+/* ===================== DUTY TOGGLE ===================== */
+const dutyToggle=document.getElementById('dutyToggle');
+const dutyDot=document.getElementById('dutyDot');
+const dutyLbl=document.querySelector('.duty-label');
+dutyToggle.addEventListener('change',()=>{
+  dutyOn=dutyToggle.checked;
+  if(dutyOn){
+    dutyDot.classList.remove('off');
+    shiftStartTs=Date.now();
+    dutyLbl.firstChild.nextSibling.textContent=' ON DUTY';
+    toast('You are now ON DUTY','ok');
+  }else{
+    dutyDot.classList.add('off');
+    dutyLbl.firstChild.nextSibling.textContent=' OFF DUTY';
+    toast('Shift paused','err');
+  }
+});
+
+/* ===================== CLOCK & SHIFT TIMER ===================== */
+function tick(){
+  const d=new Date();
+  const h=String(d.getHours()).padStart(2,'0');
+  const m=String(d.getMinutes()).padStart(2,'0');
+  const s=String(d.getSeconds()).padStart(2,'0');
+  document.getElementById('clockTime').textContent=`${h}:${m}:${s}`;
+  document.getElementById('clockDate').textContent=d.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short'}).toUpperCase();
+
+  if(dutyOn){
+    const diff=Date.now()-shiftStartTs;
+    const sh=Math.floor(diff/3600000);
+    const sm=Math.floor((diff%3600000)/60000);
+    const ss=Math.floor((diff%60000)/1000);
+    document.getElementById('shiftTimer').textContent=
+      `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+  }
+}
+setInterval(tick,1000);tick();
+
+/* ===================== RING (shift goal) ===================== */
+function animateRing(){
+  const target=68; // demo % — could be computed from scansToday / daily goal
+  const ring=document.getElementById('ringFg');
+  const pct=document.getElementById('ringPct');
+  const C=314;
+  const dur=1400;
+  const t0=performance.now();
+  function step(t){
+    const p=Math.min(1,(t-t0)/dur);
+    const eased=1-Math.pow(1-p,3);
+    const v=Math.floor(target*eased);
+    ring.style.strokeDashoffset=C-(C*v/100);
+    pct.textContent=v+'%';
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ===================== HEATMAP (synthetic from scansToday) ===================== */
+function buildHeatmap(){
+  const el=document.getElementById('heatmap');
+  el.innerHTML='';
+  for(let i=0;i<24;i++){
+    const c=document.createElement('div');
+    c.className='heatcell';
+    const r=Math.random();
+    if(r>0.92) c.classList.add('l4');
+    else if(r>0.78) c.classList.add('l3');
+    else if(r>0.55) c.classList.add('l2');
+    else if(r>0.30) c.classList.add('l1');
+    c.title=`Hour ${i}:00 — ${Math.floor(r*15)} scans`;
+    el.appendChild(c);
+  }
+}
+
+/* ===================== LIVE FEED ===================== */
+function loadFeed(){
+  const feed=document.getElementById('feed');
+  feed.innerHTML='';
+  const uid=currentOfficer.uid;
+  let items=[];
+  db.ref('scanHistory/'+uid).limitToLast(6).once('value').then(snap=>{
+    snap.forEach(userNode=>{
+      const userKey=userNode.key;
+      userNode.forEach(scan=>{
+        const v=scan.val();
+        items.push({
+          type:'scan',
+          icon:'fa-qrcode',
+          cls:'scan',
+          line:`Scanned vehicle · ${v.vehicleNo||userKey.slice(0,8)}`,
+          meta:[v.scannedAt?relTime(v.scannedAt):'just now',v.status||'verified']
+        });
+      });
+    });
+    if(watchlistN>0){
+      items.unshift({
+        type:'watch',
+        icon:'fa-triangle-exclamation',
+        cls:'watch',
+        line:`${watchlistN} suspect${watchlistN>1?'s':''} on your watchlist`,
+        meta:['live','priority']
+      });
+    }
+    items.push({type:'verify',icon:'fa-user-check',cls:'verify',line:'Citizen database sync · OK',meta:['just now','auto']});
+    items=items.slice(0,6);
+    feed.innerHTML=items.map((it,i)=>`
+      <li style="animation-delay:${i*60}ms">
+        <div class="dot ${it.cls}"><i class="fa-solid ${it.icon}"></i></div>
+        <div class="body">
+          <div class="line">${it.line}</div>
+          <div class="meta">${it.meta.map(m=>`<span>${m}</span>`).join('<span>·</span>')}</div>
+        </div>
+      </li>`).join('')||'<li class="feed-empty"><i class="fa-solid fa-satellite-dish"></i>No recent activity</li>';
+  });
+}
+
+function relTime(ts){
+  const d=(Date.now()-ts)/1000;
+  if(d<60) return Math.floor(d)+'s ago';
+  if(d<3600) return Math.floor(d/60)+'m ago';
+  if(d<86400) return Math.floor(d/3600)+'h ago';
+  return Math.floor(d/86400)+'d ago';
+}
+
+/* ===================== PALETTE ===================== */
+const palette=document.getElementById('palette');
+palette.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const v=palette.value.trim();
+    if(!v)return;
+    if(/^[\w.+-]+@[\w-]+\.[\w.-]+$/.test(v)) location.href='docuverification.html?email='+encodeURIComponent(v);
+    else location.href='docuverification.html?q='+encodeURIComponent(v);
+  }
+});
+window.addEventListener('keydown',e=>{
+  if(e.key==='/' && document.activeElement!==palette){
+    e.preventDefault();palette.focus();
+  }
+});
+
+/* ===================== NAV LOGOUT ===================== */
+document.getElementById('navLogout').addEventListener('click',logout);
+
+/* ===================== TOAST ===================== */
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.className='toast show '+(type||'');
+  t.innerHTML=(type==='err'?'<i class="fa-solid fa-circle-xmark"></i>':(type==='ok'?'<i class="fa-solid fa-circle-check"></i>':'<i class="fa-solid fa-circle-info"></i>'))+' '+msg;
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ===================== LOGOUT ===================== */
+function logout(){auth.signOut().then(()=>window.location.href='../index.html');}
+</script>
+</body>
+</html>

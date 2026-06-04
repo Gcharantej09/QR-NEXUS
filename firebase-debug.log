@@ -1,0 +1,51 @@
+[debug] [2026-06-04T10:21:33.006Z] ----------------------------------------------------------------------
+[debug] [2026-06-04T10:21:33.011Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\gchar\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2026-06-04T10:21:33.011Z] CLI Version:   15.19.1
+[debug] [2026-06-04T10:21:33.011Z] Platform:      win32
+[debug] [2026-06-04T10:21:33.011Z] Node Version:  v24.10.0
+[debug] [2026-06-04T10:21:33.012Z] Time:          Thu Jun 04 2026 15:51:33 GMT+0530 (India Standard Time)
+[debug] [2026-06-04T10:21:33.012Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-04T10:21:34.690Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-04T10:21:34.690Z] > authorizing via signed-in user (gcharanyadav23@gmail.com)
+[debug] [2026-06-04T10:21:34.690Z] [iam] checking project qr-nexus-81938 for permissions ["firebase.projects.get"]
+[debug] [2026-06-04T10:21:34.691Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:34.691Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:34.692Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938:testIamPermissions [none]
+[debug] [2026-06-04T10:21:34.692Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938:testIamPermissions  x-goog-user-project=qr-nexus-81938
+[debug] [2026-06-04T10:21:34.692Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-06-04T10:21:36.025Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938:testIamPermissions 200
+[debug] [2026-06-04T10:21:36.025Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-06-04T10:21:36.026Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:36.026Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:36.026Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/qr-nexus-81938/services/cloudresourcemanager.googleapis.com [none]
+[debug] [2026-06-04T10:21:36.026Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/qr-nexus-81938/services/cloudresourcemanager.googleapis.com  x-goog-user-project=qr-nexus-81938
+[debug] [2026-06-04T10:21:38.296Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/qr-nexus-81938/services/cloudresourcemanager.googleapis.com 200
+[debug] [2026-06-04T10:21:38.297Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/qr-nexus-81938/services/cloudresourcemanager.googleapis.com [omitted]
+[debug] [2026-06-04T10:21:38.303Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:38.303Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:38.303Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938 [none]
+[debug] [2026-06-04T10:21:38.709Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938 200
+[debug] [2026-06-04T10:21:38.709Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/qr-nexus-81938 {"projectNumber":"597878562208","projectId":"qr-nexus-81938","lifecycleState":"ACTIVE","name":"QR Nexus","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-01-06T08:45:11.905023Z"}
+[info] 
+[info] === Serving from 'D:\project reveiw\qr-nexus-FINAL\qr-nexus-final'...
+[info] 
+[debug] [2026-06-04T10:21:38.712Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:38.712Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:38.712Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/qr-nexus-81938/sites 
+[debug] [2026-06-04T10:21:40.188Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/qr-nexus-81938/sites 200
+[debug] [2026-06-04T10:21:40.188Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/qr-nexus-81938/sites {"sites":[{"name":"projects/qr-nexus-81938/sites/qr-nexus-81938","defaultUrl":"https://qr-nexus-81938.web.app","appId":"1:597878562208:web:acaac02de0078f86e018c5","type":"DEFAULT_SITE"}]}
+[debug] [2026-06-04T10:21:40.188Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:40.189Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:40.189Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/qr-nexus-81938/webApps/1:597878562208:web:acaac02de0078f86e018c5/config [none]
+[debug] [2026-06-04T10:21:43.162Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/qr-nexus-81938/webApps/1:597878562208:web:acaac02de0078f86e018c5/config 200
+[debug] [2026-06-04T10:21:43.162Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/qr-nexus-81938/webApps/1:597878562208:web:acaac02de0078f86e018c5/config {"projectId":"qr-nexus-81938","appId":"1:597878562208:web:acaac02de0078f86e018c5","databaseURL":"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"qr-nexus-81938.firebasestorage.app","apiKey":"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA","authDomain":"qr-nexus-81938.firebaseapp.com","messagingSenderId":"597878562208","projectNumber":"597878562208","version":"2"}
+[debug] [2026-06-04T10:21:43.236Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:43.236Z] Checked if tokens are valid: true, expires at: 1780569714541
+[debug] [2026-06-04T10:21:43.236Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/qr-nexus-81938 [none]
+[debug] [2026-06-04T10:21:43.874Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/qr-nexus-81938 200
+[debug] [2026-06-04T10:21:43.874Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/qr-nexus-81938 {"projectId":"qr-nexus-81938","projectNumber":"597878562208","displayName":"QR Nexus","name":"projects/qr-nexus-81938","resources":{"hostingSite":"qr-nexus-81938","realtimeDatabaseInstance":"qr-nexus-81938-default-rtdb"},"state":"ACTIVE","etag":"1_9884b6e5-e434-4924-a93f-7026465533ef"}
+[info] +  hosting[qr-nexus-81938]: Local server: http://localhost:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://localhost:5000\u001b[22m\u001b[24m"}}
+[info] i  hosting: ::1 - - [04/Jun/2026:10:21:49 +0000] "GET / HTTP/1.1" 200 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.122.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"::1 - - [04/Jun/2026:10:21:49 +0000] \"GET / HTTP/1.1\" 200 - \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.122.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36\""}}
+[info] i  hosting: ::1 - - [04/Jun/2026:10:21:50 +0000] "GET /design-system.css HTTP/1.1" 200 - "http://localhost:5000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.122.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"::1 - - [04/Jun/2026:10:21:50 +0000] \"GET /design-system.css HTTP/1.1\" 200 - \"http://localhost:5000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.122.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36\""}}
+[info] i  hosting: ::1 - - [04/Jun/2026:10:21:51 +0000] "GET /favicon.ico HTTP/1.1" 404 150 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.122.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"::1 - - [04/Jun/2026:10:21:51 +0000] \"GET /favicon.ico HTTP/1.1\" 404 150 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.122.1 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36\""}}

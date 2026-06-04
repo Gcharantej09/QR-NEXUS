@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"fetch\\('https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app/users/-Oxxx.json'\\).then\\(\\(\\)=>{}\\);\")"
+    ]
+  }
+}

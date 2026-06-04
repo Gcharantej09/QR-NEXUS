@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Vehicles · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.quota-bar{
+  background:#fff;border:1px solid var(--cit-line-2);border-radius:14px;
+  padding:14px 18px;margin-bottom:16px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.04);
+}
+.quota-cell{text-align:center;}
+.quota-cell .lbl{font-size:0.7rem;color:var(--cit-mute);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:4px;}
+.quota-cell .val{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--cit-text);}
+.quota-cell .val .max{color:var(--cit-mute);font-weight:500;}
+.quota-cell.warn .val{color:var(--cit-saffron);}
+.quota-cell.full .val{color:var(--cit-red);}
+
+.add-card{background:#fff;border:1px solid var(--cit-line-2);border-radius:18px;padding:22px;margin-bottom:18px;box-shadow:0 4px 14px rgba(0,0,0,0.04);}
+.add-card h3{font-size:1.05rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--cit-text);font-family:var(--font-display);}
+.add-card h3 i{color:var(--cit-saffron);}
+
+.vehicle-card{
+  background:#fff;border:1px solid var(--cit-line-2);border-radius:16px;
+  padding:18px;margin-bottom:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.04);
+  border-left:5px solid var(--cit-saffron);
+  transition:all var(--t) var(--ease);
+}
+.vehicle-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(255,107,0,0.10);}
+.vehicle-card.expired{border-left-color:var(--cit-red);}
+.vehicle-card.expiring{border-left-color:var(--cit-amber);}
+.vehicle-card .vhead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+.vehicle-card .vtype{font-size:1.05rem;color:var(--cit-text);font-weight:700;font-family:var(--font-display);}
+.vehicle-card .vrc{color:var(--cit-mute);font-size:0.85rem;font-family:var(--font-mono);}
+.vplate{display:inline-block;background:linear-gradient(135deg,#FFDD00,#FFAA00);color:#000;padding:6px 14px;border-radius:6px;font-weight:700;letter-spacing:1.5px;font-size:0.95rem;font-family:var(--font-mono);border:2px solid #000;box-shadow:0 2px 8px rgba(255,170,0,0.30);}
+.vehicle-card .vrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:0.85rem;}
+.vehicle-card .vitem{background:#FFF8F0;padding:8px 10px;border-radius:8px;}
+.vehicle-card .vitem label{display:block;color:var(--cit-mute);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;font-weight:600;}
+.vehicle-card .vitem span{color:var(--cit-text);font-weight:600;}
+.vehicle-card .vitem.expired span{color:var(--cit-red);}
+.vehicle-card .vitem.expiring span{color:#B8860B;}
+.vehicle-card .vactions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+.quota-block{
+  background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.30);
+  border-left:4px solid var(--cit-red);
+  border-radius:10px;padding:10px 14px;margin-bottom:14px;
+  font-size:0.85rem;color:#7A1820;display:flex;align-items:center;gap:8px;
+}
+.quota-block i{color:var(--cit-red);}
+
+@media(max-width:640px){
+  .quota-bar{grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px;}
+  .vehicle-card .vrow{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-car-side"></i> My Vehicles</h2>
+        <div class="sub">Manage all your registered vehicles. Govt of India vehicle-per-citizen limits apply.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <!-- Quota tracker -->
+    <div class="quota-bar">
+      <div class="quota-cell" id="q2w"><div class="lbl">Two-Wheelers</div><div class="val"><span class="now">0</span><span class="max"> / 2</span></div></div>
+      <div class="quota-cell" id="q4w"><div class="lbl">Four-Wheelers</div><div class="val"><span class="now">0</span><span class="max"> / 2</span></div></div>
+      <div class="quota-cell" id="qcm"><div class="lbl">Commercial</div><div class="val"><span class="now">0</span><span class="max"> / 1</span></div></div>
+    </div>
+
+    <div class="quota-block" id="quotaBlock" style="display:none;">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="quotaText"></span>
+    </div>
+
+    <!-- Add form -->
+    <div class="add-card">
+      <h3 id="formTitle"><i class="fa-solid fa-circle-plus"></i> Add New Vehicle</h3>
+      <form id="vehicleForm" autocomplete="off" class="form-grid">
+        <input type="hidden" id="editId">
+        <div class="field"><label>Vehicle Type</label>
+          <select class="input" id="vType" required>
+            <option value="">Select</option>
+            <option value="Two-Wheeler (Motorcycle/Scooter)">Two-Wheeler</option>
+            <option value="Car">Car</option>
+            <option value="Three-Wheeler (Auto)">Three-Wheeler</option>
+            <option value="Commercial Vehicle (Truck/Bus)">Commercial (Truck/Bus)</option>
+            <option value="Tractor">Tractor</option>
+            <option value="Electric Vehicle">Electric Vehicle</option>
+          </select>
+        </div>
+        <div class="field"><label>Make / Brand</label><input class="input" type="text" id="vMake" placeholder="Honda, Maruti, Tata…" required></div>
+        <div class="field"><label>Model</label><input class="input" type="text" id="vModel" placeholder="Activa, Swift, Nexon…" required></div>
+        <div class="field"><label>Year of Manufacture</label><input class="input" type="number" id="vYear" min="1990" max="2026" placeholder="2024" required></div>
+        <div class="field"><label>Registration Number</label><input class="input" type="text" id="vRC" placeholder="TS09AB1234" required style="text-transform:uppercase;"></div>
+        <div class="field"><label>Fuel Type</label>
+          <select class="input" id="vFuel">
+            <option>Petrol</option><option>Diesel</option><option>CNG</option>
+            <option>Electric</option><option>Hybrid</option>
+          </select>
+        </div>
+        <div class="field"><label>Engine Number (last 5)</label><input class="input" type="text" id="vEngine" placeholder="Last 5 chars"></div>
+        <div class="field"><label>Chassis Number (last 5)</label><input class="input" type="text" id="vChassis" placeholder="Last 5 chars"></div>
+        <div class="field"><label>Insurance Valid Till</label><input class="input" type="date" id="vInsurance"></div>
+        <div class="field"><label>PUC Valid Till</label><input class="input" type="date" id="vPuc"></div>
+        <div class="field"><label>Fitness Valid Till (if applicable)</label><input class="input" type="date" id="vFitness"></div>
+        <div class="field"><label>Color</label><input class="input" type="text" id="vColor" placeholder="White, Red…"></div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnTxt">Save Vehicle</span></button>
+          <button type="button" class="btn btn-ghost btn-block" id="cancelEdit" style="display:none;margin-top:6px;" onclick="resetForm()">Cancel Edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="section-title">📋 Registered Vehicles</div>
+    <div id="vehicleList"><div class="loading"><span class="spinner"></span> Loading vehicles…</div></div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="citizen-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+
+// Govt of India vehicle-per-citizen limits
+const LIMITS={
+  'Two-Wheeler (Motorcycle/Scooter)': 2,
+  'Car': 2,
+  'Three-Wheeler (Auto)': 1,
+  'Commercial Vehicle (Truck/Bus)': 1,
+  'Tractor': 1,
+  'Electric Vehicle': 2  // EV is treated like its fuel category
+};
+function categoryOf(type){
+  if(!type) return 'cm';
+  if(type.startsWith('Two-Wheeler')) return '2w';
+  if(type==='Car') return '4w';
+  return 'cm';
+}
+function maxFor(type){ return LIMITS[type]||1; }
+
+let currentUser=null;
+let allVehicles={};
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  currentUser=user;
+  loadVehicles();
+});
+
+function loadVehicles(){
+  db.ref('vehicles/'+currentUser.uid).on('value',snap=>{
+    allVehicles={};
+    snap.forEach(c=>allVehicles[c.key]={id:c.key,...c.val()});
+    updateQuota();
+    renderList();
+  });
+}
+
+function updateQuota(){
+  const counts={'2w':0,'4w':0,'cm':0};
+  Object.values(allVehicles).forEach(v=>{counts[categoryOf(v.type)]++;});
+  const cells={
+    q2w:['2w',counts['2w'],2],
+    q4w:['4w',counts['4w'],2],
+    qcm:['cm',counts['cm'],1]
+  };
+  Object.entries(cells).forEach(([id,[k,now,max]])=>{
+    const el=document.getElementById(id);
+    el.querySelector('.now').textContent=now;
+    el.classList.remove('warn','full');
+    if(now>=max) el.classList.add('full');
+    else if(now>=max-1) el.classList.add('warn');
+  });
+  // Show block if any category at limit
+  const atLimit=Object.entries(counts).some(([k,v])=>v>=maxForFirstIn(k));
+  const block=document.getElementById('quotaBlock');
+  if(atLimit){
+    const which=[];
+    if(counts['2w']>=2) which.push('2 two-wheelers');
+    if(counts['4w']>=2) which.push('2 cars');
+    if(counts['cm']>=1) which.push('a commercial vehicle');
+    document.getElementById('quotaText').textContent='You have reached the Govt of India limit of '+which.join(' & ')+' per citizen. Additional vehicles require an NOC from the RTO.';
+    block.style.display='flex';
+  }else block.style.display='none';
+}
+function maxForFirstIn(k){
+  if(k==='2w') return 2;
+  if(k==='4w') return 2;
+  return 1;
+}
+
+function wouldExceedLimit(type,editId){
+  const cat=categoryOf(type);
+  const max=maxForFirstIn(cat);
+  const current=Object.values(allVehicles).filter(v=>categoryOf(v.type)===cat && v.id!==editId).length;
+  return current>=max;
+}
+
+function renderList(){
+  const list=document.getElementById('vehicleList');
+  const arr=Object.values(allVehicles).sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
+  if(arr.length===0){
+    list.innerHTML='<div class="empty"><i class="fa-solid fa-car"></i>No vehicles added yet. Use the form above to add your first vehicle.</div>';
+    return;
+  }
+  const now=Date.now();
+  list.innerHTML=arr.map(v=>{
+    const insExp=v.insurance?new Date(v.insurance).getTime():null;
+    const pucExp=v.puc?new Date(v.puc).getTime():null;
+    const insDays=insExp?Math.round((insExp-now)/86400000):null;
+    const pucDays=pucExp?Math.round((pucExp-now)/86400000):null;
+    const insClass=insDays==null?'':insDays<0?'expired':insDays<30?'expiring':'';
+    const pucClass=pucDays==null?'':pucDays<0?'expired':pucDays<30?'expiring':'';
+    const cardClass=(insClass==='expired'||pucClass==='expired')?'expired':(insClass==='expiring'||pucClass==='expiring')?'expiring':'';
+    return `
+    <div class="vehicle-card ${cardClass}" data-id="${v.id}">
+      <div class="vhead">
+        <div>
+          <div class="vtype">${escapeHtml(v.type||'—')}</div>
+          <div style="color:var(--cit-mute);font-size:0.82rem;">${escapeHtml(v.make||'')} ${escapeHtml(v.model||'')} (${escapeHtml(String(v.year||''))})</div>
+        </div>
+        <span class="vplate">${escapeHtml(v.rc||'—')}</span>
+      </div>
+      <div class="vrow">
+        <div class="vitem"><label>Fuel</label><span>${escapeHtml(v.fuel||'—')}</span></div>
+        <div class="vitem"><label>Color</label><span>${escapeHtml(v.color||'—')}</span></div>
+        <div class="vitem ${insClass}"><label>Insurance Till</label><span>${v.insurance?new Date(v.insurance).toLocaleDateString():'—'}${insDays!=null?` (${insDays<0?Math.abs(insDays)+'d lapsed':insDays+'d left'})`:''}</span></div>
+        <div class="vitem ${pucClass}"><label>PUC Till</label><span>${v.puc?new Date(v.puc).toLocaleDateString():'—'}${pucDays!=null?` (${pucDays<0?Math.abs(pucDays)+'d lapsed':pucDays+'d left'})`:''}</span></div>
+      </div>
+      <div class="vactions">
+        <button class="btn btn-primary btn-sm" onclick='editVehicle("${v.id}")'><i class="fa-solid fa-pen"></i> Edit</button>
+        <button class="btn btn-danger btn-sm" onclick='deleteVehicle("${v.id}")'><i class="fa-solid fa-trash"></i> Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('vehicleForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!currentUser)return;
+  const id=document.getElementById('editId').value;
+  const type=document.getElementById('vType').value;
+  // Limit check on add
+  if(!id && wouldExceedLimit(type,'')){
+    toast('You have reached the Govt of India limit for '+type+'. NOC required.','err');
+    return;
+  }
+  const data={
+    type,make:document.getElementById('vMake').value.trim(),
+    model:document.getElementById('vModel').value.trim(),
+    year:document.getElementById('vYear').value,
+    rc:document.getElementById('vRC').value.trim().toUpperCase(),
+    fuel:document.getElementById('vFuel').value,
+    engine:document.getElementById('vEngine').value.trim(),
+    chassis:document.getElementById('vChassis').value.trim(),
+    insurance:document.getElementById('vInsurance').value,
+    puc:document.getElementById('vPuc').value,
+    fitness:document.getElementById('vFitness').value,
+    color:document.getElementById('vColor').value.trim(),
+    userId:currentUser.uid,userEmail:currentUser.email,updatedAt:Date.now()
+  };
+  try{
+    let ref;
+    if(id){
+      ref=db.ref('vehicles/'+currentUser.uid+'/'+id);
+      await ref.update(data);
+      toast('Vehicle updated','ok');
+    }else{
+      data.addedAt=Date.now();
+      ref=db.ref('vehicles/'+currentUser.uid).push();
+      await ref.set(data);
+      toast('Vehicle added successfully','ok');
+    }
+    resetForm();
+  }catch(err){
+    toast('Save failed: '+err.message,'err');
+  }
+});
+
+function resetForm(){
+  document.getElementById('vehicleForm').reset();
+  document.getElementById('editId').value='';
+  document.getElementById('formTitle').innerHTML='<i class="fa-solid fa-circle-plus"></i> Add New Vehicle';
+  document.getElementById('cancelEdit').style.display='none';
+  document.getElementById('saveBtnTxt').textContent='Save Vehicle';
+}
+
+function editVehicle(id){
+  const v=allVehicles[id];
+  if(!v)return;
+  document.getElementById('editId').value=id;
+  document.getElementById('vType').value=v.type||'';
+  document.getElementById('vMake').value=v.make||'';
+  document.getElementById('vModel').value=v.model||'';
+  document.getElementById('vYear').value=v.year||'';
+  document.getElementById('vRC').value=v.rc||'';
+  document.getElementById('vFuel').value=v.fuel||'Petrol';
+  document.getElementById('vEngine').value=v.engine||'';
+  document.getElementById('vChassis').value=v.chassis||'';
+  document.getElementById('vInsurance').value=v.insurance||'';
+  document.getElementById('vPuc').value=v.puc||'';
+  document.getElementById('vFitness').value=v.fitness||'';
+  document.getElementById('vColor').value=v.color||'';
+  document.getElementById('formTitle').innerHTML='<i class="fa-solid fa-pen"></i> Edit Vehicle';
+  document.getElementById('cancelEdit').style.display='inline-block';
+  document.getElementById('saveBtnTxt').textContent='Update Vehicle';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteVehicle(id){
+  if(!confirm('Delete this vehicle? This cannot be undone.'))return;
+  db.ref('vehicles/'+currentUser.uid+'/'+id).remove().then(()=>toast('Vehicle deleted','ok'));
+}
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>

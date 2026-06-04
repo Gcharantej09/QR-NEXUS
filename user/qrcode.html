@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My QR Code · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.qr-wrap{max-width:520px;margin:0 auto;background:#fff;border:1px solid var(--cit-line-2);border-radius:20px;padding:32px;text-align:center;box-shadow:0 8px 28px rgba(255,107,0,0.10);position:relative;overflow:hidden;}
+.qr-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--cit-saffron),var(--cit-green),var(--cit-saffron));background-size:200% 100%;animation:grad 4s linear infinite;}
+@keyframes grad{from{background-position:0 0;}to{background-position:200% 0;}}
+.qr-wrap h2{font-size:1.5rem;margin-bottom:6px;color:var(--cit-text);font-family:var(--font-display);}
+.qr-wrap h2 i{color:var(--cit-saffron);}
+.qr-wrap .sub{color:var(--cit-mute);font-size:0.88rem;margin-bottom:20px;}
+#qrcode{display:flex;justify-content:center;margin:20px 0;min-height:240px;align-items:center;}
+#qrcode canvas,#qrcode img{border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.10);padding:12px;background:#fff;}
+.qr-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(31,184,31,0.12);color:var(--cit-green);padding:6px 14px;border-radius:999px;font-size:0.75rem;font-weight:600;margin-bottom:14px;}
+.details{background:var(--cit-bg-2);border:1px solid var(--cit-line-2);border-radius:12px;padding:16px;text-align:left;margin:16px 0;}
+.details .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--cit-line-2);font-size:0.88rem;}
+.details .row:last-child{border-bottom:none;}
+.details .row label{color:var(--cit-mute);font-size:0.78rem;}
+.details .row span{color:var(--cit-text);font-weight:600;font-family:var(--font-mono);}
+.btn-wrap{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-id-card"></i> My QR Code</h2>
+        <div class="sub">Show this to the traffic officer for instant verification.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="qr-wrap">
+      <div class="qr-badge"><i class="fa-solid fa-shield-halved"></i> Encrypted · 256-bit AES</div>
+      <h2><i class="fa-solid fa-qrcode"></i> My QR Code</h2>
+      <p class="sub">Show this to the traffic officer for verification</p>
+      <div id="qrcode"><div class="loading"><span class="spinner"></span> Loading your QR code…</div></div>
+      <div class="details" id="details" style="display:none;"></div>
+      <div class="btn-wrap">
+        <button class="btn btn-primary" onclick="downloadQR()"><i class="fa-solid fa-download"></i> Download QR</button>
+        <button class="btn btn-ghost" onclick="location.href='share.html'"><i class="fa-solid fa-share-nodes"></i> Share</button>
+        <button class="btn btn-ghost" onclick="location.href='userhome.html'"><i class="fa-solid fa-house"></i> Home</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="citizen-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const ENC_KEY='66MXNJUNXTH';
+
+let currentEnc=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  db.ref('users/'+user.uid+'/lastQrCodeData').once('value').then(snap=>{
+    const enc=snap.val();
+    if(!enc){document.getElementById('qrcode').innerHTML='<div class="empty"><i class="fa-solid fa-qrcode"></i>No QR code found.<br>Generate one from the <a href="getqr.html" style="color:var(--cit-saffron);">Get QR</a> page first.</div>';return;}
+    currentEnc=enc;
+    generateQR(enc);
+    try{
+      const bytes=CryptoJS.AES.decrypt(enc,ENC_KEY);
+      const data=JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      showDetails(data);
+    }catch(e){}
+  });
+});
+
+function generateQR(text){
+  const div=document.getElementById('qrcode');
+  div.innerHTML='';
+  new QRCode(div,{text:text,width:220,height:220,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+}
+
+function showDetails(d){
+  const div=document.getElementById('details');
+  div.style.display='block';
+  div.innerHTML=`
+    <div class="row"><label>DL Number</label><span>${esc(d.dlNumber)}</span></div>
+    <div class="row"><label>RC Number</label><span>${esc(d.rcNumber)}</span></div>
+    <div class="row"><label>Pollution Cert</label><span>${esc(d.pollutionNumber)}</span></div>
+    <div class="row"><label>Phone</label><span>${esc(d.phoneNumber)}</span></div>
+    <div class="row" id="docRow" style="display:none"><label>Document</label><span><a id="docLink" href="#" target="_blank" style="color:var(--cit-saffron);">View Document</a></span></div>
+  `;
+  if(d.fileUrl){
+    document.getElementById('docRow').style.display='flex';
+    document.getElementById('docLink').href=d.fileUrl;
+  }
+}
+
+function downloadQR(){
+  const canvas=document.querySelector('#qrcode canvas');
+  if(!canvas){toast('QR code not loaded yet.','err');return;}
+  const link=document.createElement('a');
+  link.download='qr-nexus-qrcode.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+  toast('Downloaded','ok');
+}
+
+function esc(s){return String(s||'-').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>

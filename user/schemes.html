@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Government Schemes · QR Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.category-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.cat-btn{padding:8px 16px;border:1.5px solid var(--cit-line-2);border-radius:999px;background:#fff;color:var(--cit-mute);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all var(--t-fast) var(--ease);}
+.cat-btn:hover{background:var(--cit-bg-2);border-color:var(--cit-saffron);color:var(--cit-saffron);}
+.cat-btn.active{background:linear-gradient(135deg,var(--cit-saffron),#FF8C42);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(255,107,0,0.25);}
+.scheme-card{background:#fff;border:1px solid var(--cit-line-2);border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,0.04);transition:all var(--t) var(--ease);position:relative;overflow:hidden;}
+.scheme-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(255,107,0,0.10);}
+.scheme-card::before{content:'';position:absolute;top:0;left:0;width:4px;bottom:0;background:linear-gradient(180deg,var(--cit-saffron),var(--cit-green));}
+.scheme-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.scheme-head h3{color:var(--cit-text);font-size:1.05rem;flex:1;font-family:var(--font-display);font-weight:700;}
+.badge{font-size:0.7rem;padding:4px 10px;border-radius:999px;font-weight:700;letter-spacing:0.04em;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.badge-free{background:rgba(31,184,31,0.15);color:#0B5A0B;}
+.badge-paid{background:rgba(255,176,32,0.18);color:#8B6914;}
+.badge-popular{background:rgba(255,71,87,0.15);color:#7A1820;}
+.scheme-desc{color:#4B463E;font-size:0.88rem;line-height:1.55;margin-bottom:12px;}
+.scheme-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:0.8rem;}
+.scheme-meta .meta-item{color:var(--cit-mute);}
+.scheme-meta .meta-item strong{color:var(--cit-text);font-weight:600;}
+.price{color:var(--cit-saffron);font-weight:700;}
+.scheme-doc{font-size:0.78rem;color:var(--cit-mute);margin-bottom:12px;padding:8px 12px;background:var(--cit-bg-2);border-radius:8px;border-left:3px solid var(--cit-saffron);}
+.scheme-doc strong{color:var(--cit-text);}
+.success-banner{background:rgba(31,184,31,0.10);border:1px solid rgba(31,184,31,0.30);color:#0B5A0B;padding:12px 14px;border-radius:10px;margin-top:14px;display:none;font-size:0.88rem;align-items:center;gap:8px;}
+.success-banner.show{display:flex;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-landmark"></i> Government Schemes &amp; Services</h2>
+        <div class="sub">Apply for traffic-related government schemes and subsidies.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="category-tabs">
+      <button class="cat-btn active" onclick="filterCat('all',this)">All</button>
+      <button class="cat-btn" onclick="filterCat('license',this)">Licenses</button>
+      <button class="cat-btn" onclick="filterCat('vehicle',this)">Vehicle</button>
+      <button class="cat-btn" onclick="filterCat('subsidy',this)">Subsidies</button>
+      <button class="cat-btn" onclick="filterCat('safety',this)">Safety</button>
+    </div>
+
+    <div id="successBanner" class="success-banner"><i class="fa-solid fa-circle-check"></i> Application submitted! Reference: <span id="refId" style="font-family:var(--font-mono);font-weight:700;"></span></div>
+
+    <div id="schemesList"></div>
+
+  </div>
+</div>
+
+<!-- Apply modal -->
+<div class="modal" id="applyModal">
+  <div class="box">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3><i class="fa-solid fa-file-pen"></i> <span id="modalTitle">Apply for Scheme</span></h3>
+    <p class="sub" id="modalDesc"></p>
+    <form id="applyForm">
+      <div class="field"><label>Full Name</label><input class="input" type="text" id="appName" required></div>
+      <div class="field"><label>Phone Number</label><input class="input" type="tel" id="appPhone" required></div>
+      <div class="field"><label>Vehicle / DL Number (if applicable)</label><input class="input" type="text" id="appVehicle"></div>
+      <div class="field"><label>Address</label><input class="input" type="text" id="appAddress" required></div>
+      <div class="field"><label>Additional Notes</label><input class="input" type="text" id="appNotes"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button type="button" class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="citizen-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+
+let currentUser=null;
+let currentScheme=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  currentUser=user;
+  document.getElementById('appName').value=user.displayName||'';
+  document.getElementById('appPhone').value=user.phoneNumber||'';
+  renderSchemes('all');
+});
+
+const SCHEMES=[
+  {id:'ll-2w',cat:'license',name:'Two-Wheeler Learning License',badge:'popular',badgeText:'Most Applied',
+   desc:'Apply for a learning license for motorcycles/scooters (up to 50cc gearless or with gear). Mandatory before permanent DL.',
+   fee:'₹200',validity:'6 months',processing:'3-5 days',eligibility:'Age 16+ (50cc), 18+ (with gear)',
+   docsRequired:'Aadhaar, Address proof, Age proof, 2 photos'},
+  {id:'dl-2w',cat:'license',name:'Two-Wheeler Permanent Driving License',badge:'paid',badgeText:'Paid',
+   desc:'Permanent DL for two-wheelers. Must hold a valid learning license for at least 30 days before applying.',
+   fee:'₹400',validity:'20 years / until age 50',processing:'7-15 days',eligibility:'Age 18+ with valid LL',
+   docsRequired:'Learning license, Aadhaar, Medical certificate'},
+  {id:'dl-renewal',cat:'license',name:'Driving License Renewal',badge:'paid',badgeText:'Paid',
+   desc:'Renew your expired or expiring driving license. Apply before expiry to avoid penalty.',
+   fee:'₹200 (+₹50 late fee if expired)',validity:'5 years',processing:'7 days',eligibility:'Existing DL holders',
+   docsRequired:'Old DL, Aadhaar, Medical form 1A'},
+  {id:'intl-dl',cat:'license',name:'International Driving Permit',badge:'paid',badgeText:'Paid',
+   desc:'Required to drive Indian-registered vehicles abroad. Valid in 150+ countries under Vienna Convention.',
+   fee:'₹1,000',validity:'1 year',processing:'7 days',eligibility:'Valid Indian DL holders',
+   docsRequired:'Valid DL, Passport, Visa, Photos'},
+
+  {id:'rc-new',cat:'vehicle',name:'New Vehicle Registration (RC)',badge:'paid',badgeText:'Paid',
+   desc:'Register a newly purchased vehicle and get the official Registration Certificate.',
+   fee:'₹600 (varies by state)',validity:'15 years',processing:'7-15 days',eligibility:'Vehicle owner with invoice',
+   docsRequired:'Invoice, Insurance, Form 21, Form 22, Aadhaar'},
+  {id:'rc-transfer',cat:'vehicle',name:'Vehicle Ownership Transfer',badge:'paid',badgeText:'Paid',
+   desc:'Transfer vehicle ownership to a new buyer. Required when selling/buying a used vehicle.',
+   fee:'₹300 (bike) – ₹600 (car)',validity:'Lifetime',processing:'15-30 days',eligibility:'Current RC owner',
+   docsRequired:'Old RC, NOC, Insurance, Aadhaar (both parties)'},
+  {id:'fc',cat:'vehicle',name:'Vehicle Fitness Certificate',badge:'paid',badgeText:'Paid',
+   desc:'Mandatory fitness test for vehicles older than 15 years. Renewed every 5 years after.',
+   fee:'₹400 – ₹1,200 (vehicle class)',validity:'5 years',processing:'2-7 days',eligibility:'Vehicles >15 years old',
+   docsRequired:'Existing RC, Insurance, PUC'},
+  {id:'puc',cat:'vehicle',name:'PUC Certificate (Pollution Under Control)',badge:'free',badgeText:'Free List',
+   desc:'Find authorized PUC testing centers near you. PUC is mandatory for all vehicles on Indian roads.',
+   fee:'₹60-150 (slab-based)',validity:'1 year (new) / 6 months (old)',processing:'Same day',eligibility:'All vehicles',
+   docsRequired:'Vehicle, RC copy'},
+  {id:'address-change',cat:'vehicle',name:'RC Address Change',badge:'paid',badgeText:'Paid',
+   desc:'Update your address in the RC after moving to a new city/state.',
+   fee:'₹200',validity:'Lifetime',processing:'15-30 days',eligibility:'RC owner',
+   docsRequired:'Old RC, New address proof, Aadhaar'},
+
+  {id:'ev-2w',cat:'subsidy',name:'FAME-II Electric Two-Wheeler Subsidy',badge:'popular',badgeText:'Limited',
+   desc:'Central government subsidy on purchase of electric two-wheelers. Reduces upfront cost by ₹10,000 – ₹40,000.',
+   fee:'Subsidy: ₹10,000 – ₹40,000',validity:'Ongoing',processing:'Instant at dealer',eligibility:'First-time EV buyers, valid Aadhaar',
+   docsRequired:'Aadhaar, Bank account, Dealer invoice'},
+  {id:'ev-4w',cat:'subsidy',name:'FAME-II Electric Car Subsidy',badge:'paid',badgeText:'Paid',
+   desc:'Subsidy on electric 4-wheelers. ₹1.5 lakh off on cars priced under ₹15 lakh.',
+   fee:'Subsidy: up to ₹1,50,000',validity:'Ongoing',processing:'Instant at dealer',eligibility:'Cars priced <₹15L',
+   docsRequired:'Aadhaar, Income proof, Invoice'},
+  {id:'scrap',cat:'subsidy',name:'Vehicle Scrappage Policy Incentive',badge:'paid',badgeText:'Paid',
+   desc:'Get up to 5% rebate on new vehicle purchase when you scrap your old (20+ year) vehicle at a registered center.',
+   fee:'Rebate: up to ₹2,50,000',validity:'Ongoing',processing:'15-30 days',eligibility:'Vehicles 20+ years old',
+   docsRequired:'Old RC, Scrappage certificate, New vehicle invoice'},
+
+  {id:'accident-ins',cat:'safety',name:'Pradhan Mantri Suraksha Bima Yojana (Accident Insurance)',badge:'popular',badgeText:'Free',
+   desc:'Government accident insurance scheme. ₹2 lakh cover for accidental death/disability at just ₹20/year.',
+   fee:'₹20/year (premium)',validity:'1 year, auto-renewable',processing:'7 days',eligibility:'Age 18-70, savings account',
+   docsRequired:'Aadhaar, Bank passbook, Photo'},
+  {id:'fastag',cat:'safety',name:'FASTag (Electronic Toll Collection)',badge:'paid',badgeText:'Paid',
+   desc:'RFID tag for cashless toll payments. Mandatory for all vehicles on national highways since Feb 2021.',
+   fee:'₹100 (one-time)',validity:'5 years',processing:'Same day at any bank',eligibility:'All vehicle owners',
+   docsRequired:'RC, Aadhaar/PAN'},
+  {id:'helmet-coupon',cat:'safety',name:'ISI-Certified Helmet Subsidy (State-wise)',badge:'free',badgeText:'Free',
+   desc:'Several state governments offer subsidized helmets through traffic police stations.',
+   fee:'Free / Subsidized (50% off)',validity:'Ongoing',processing:'Same day at participating stations',eligibility:'Two-wheeler owners',
+   docsRequired:'RC, Aadhaar'}
+];
+
+function renderSchemes(cat){
+  const list=document.getElementById('schemesList');
+  const filtered=cat==='all'?SCHEMES:SCHEMES.filter(s=>s.cat===cat);
+  list.innerHTML=filtered.map(s=>`
+    <div class="scheme-card" data-cat="${s.cat}">
+      <div class="scheme-head">
+        <h3>${esc(s.name)}</h3>
+        <span class="badge ${s.badge==='free'?'badge-free':s.badge==='popular'?'badge-popular':'badge-paid'}">${s.badge==='popular'?'<i class="fa-solid fa-fire"></i>':''} ${esc(s.badgeText)}</span>
+      </div>
+      <p class="scheme-desc">${esc(s.desc)}</p>
+      <div class="scheme-meta">
+        <span class="meta-item"><strong>Fee:</strong> <span class="price">${esc(s.fee)}</span></span>
+        <span class="meta-item"><strong>Validity:</strong> ${esc(s.validity)}</span>
+        <span class="meta-item"><strong>Processing:</strong> ${esc(s.processing)}</span>
+      </div>
+      <div class="scheme-doc"><strong>Eligibility:</strong> ${esc(s.eligibility)}<br><strong>Documents:</strong> ${esc(s.docsRequired)}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick='openApply(${JSON.stringify(s)})'><i class="fa-solid fa-file-pen"></i> Apply Now</button>
+        <button class="btn btn-ghost btn-sm" onclick='showDetails(${JSON.stringify(s)})'><i class="fa-solid fa-circle-info"></i> More Info</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCat(cat,btn){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSchemes(cat);
+}
+
+function openApply(s){
+  currentScheme=s;
+  document.getElementById('modalTitle').textContent='Apply: '+s.name;
+  document.getElementById('modalDesc').textContent='Fee: '+s.fee+' · Processing: '+s.processing;
+  document.getElementById('applyModal').classList.add('open');
+  document.getElementById('successBanner').classList.remove('show');
+}
+
+function showDetails(s){
+  const box=document.createElement('div');
+  box.className='modal open';
+  box.innerHTML=`<div class="box"><button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+    <h3><i class="fa-solid fa-circle-info"></i> ${esc(s.name)}</h3>
+    <p class="sub">${esc(s.desc)}</p>
+    <div style="font-size:0.88rem;line-height:1.7;">
+      <p><strong>Fee:</strong> <span class="price">${esc(s.fee)}</span></p>
+      <p><strong>Validity:</strong> ${esc(s.validity)}</p>
+      <p><strong>Processing time:</strong> ${esc(s.processing)}</p>
+      <p><strong>Eligibility:</strong> ${esc(s.eligibility)}</p>
+      <p><strong>Documents required:</strong> ${esc(s.docsRequired)}</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="this.closest('.modal').remove()">Close</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="this.closest('.modal').remove();openApply(currentScheme=${JSON.stringify(s).replace(/"/g,'&quot;')})">Apply Now</button>
+    </div>
+  </div>`;
+  document.body.appendChild(box);
+}
+
+function closeModal(){document.getElementById('applyModal').classList.remove('open');}
+
+document.getElementById('applyForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!currentUser||!currentScheme){return;}
+  const app={
+    schemeId:currentScheme.id,schemeName:currentScheme.name,fee:currentScheme.fee,
+    fullName:document.getElementById('appName').value.trim(),
+    phone:document.getElementById('appPhone').value.trim(),
+    vehicle:document.getElementById('appVehicle').value.trim(),
+    address:document.getElementById('appAddress').value.trim(),
+    notes:document.getElementById('appNotes').value.trim(),
+    userId:currentUser.uid,userEmail:currentUser.email,
+    appliedAt:Date.now(),status:'submitted'
+  };
+  const ref=db.ref('applications/'+currentUser.uid).push();
+  const refId=ref.key;
+  app.referenceId=refId;
+  try{
+    await ref.set(app);
+    document.getElementById('refId').textContent=refId;
+    document.getElementById('successBanner').classList.add('show');
+    closeModal();
+    this.reset();
+    toast('Application submitted!','ok');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(err){
+    toast('Submission failed: '+err.message,'err');
+  }
+});
+
+document.getElementById('applyModal').addEventListener('click',function(e){if(e.target===this) closeModal();});
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify User · QR Nexus Officer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="admin.css">
+<style>
+.search-card{
+  background:linear-gradient(160deg, rgba(255,107,0,0.06), rgba(0,229,255,0.04));
+  border:1px solid var(--console-line);border-radius:16px;
+  padding:20px;margin-bottom:18px;
+}
+.search-card label{color:var(--console-mute);font-size:0.78rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:8px;}
+.search-card .input{padding-left:42px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238090B8' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='M21 21l-4.3-4.3'/></svg>");background-repeat:no-repeat;background-position:14px center;background-size:18px;}
+
+.result-card{
+  background:linear-gradient(160deg, rgba(31,184,31,0.05), rgba(0,229,255,0.03));
+  border:1px solid rgba(31,184,31,0.25);border-radius:16px;
+  padding:22px;margin-top:6px;
+}
+.result-card h3{color:var(--neon-green);font-size:1.1rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.user-banner{display:flex;align-items:center;gap:12px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);padding:12px 14px;border-radius:12px;margin-bottom:16px;}
+.user-avatar{
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,var(--saffron),#000080);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:1.15rem;font-weight:700;
+}
+.user-info{flex:1;min-width:0;}
+.user-info .name{font-weight:600;color:#fff;font-size:0.95rem;}
+.user-info .email{font-size:0.78rem;color:var(--console-mute);word-break:break-all;}
+.field{margin-bottom:10px;}
+.field label{font-size:0.7rem;color:var(--console-mute);display:block;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;font-weight:600;}
+.field span{font-size:0.95rem;color:#fff;font-weight:500;word-break:break-all;}
+.entry{
+  background:rgba(0,0,0,0.2);border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  border-left:3px solid var(--saffron);
+}
+.entry-head{font-size:0.78rem;color:var(--neon-cyan);font-family:var(--font-mono);margin-bottom:8px;}
+.doc-link{color:var(--neon-cyan);font-size:0.85rem;text-decoration:none;display:inline-block;margin-top:6px;font-weight:600;}
+.doc-link:hover{text-decoration:underline;}
+
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:14px;}
+.quick-chip{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;border-radius:10px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--console-line);
+  color:var(--console-mute);font-size:0.78rem;cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+}
+.quick-chip:hover{background:rgba(0,229,255,0.10);color:var(--neon-cyan);border-color:rgba(0,229,255,0.3);}
+.quick-chip i{color:var(--saffron);}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="adminTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-id-card-clip"></i> Verify User</h2>
+        <div class="sub">Look up a citizen by email address — no QR scan required.</div>
+      </div>
+      <a class="back-link" href="adminhome.html"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+    </div>
+
+    <div class="search-card">
+      <label>Enter User Email</label>
+      <input type="email" class="input" id="searchEmail" placeholder="user@example.com" onkeydown="if(event.key==='Enter')searchUser()">
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-primary btn-block" onclick="searchUser()"><i class="fa-solid fa-magnifying-glass"></i> Search User</button>
+      </div>
+    </div>
+
+    <div id="resultsArea">
+      <div class="empty">
+        <i class="fa-solid fa-id-card"></i>
+        Enter an email above to look up a citizen's documents and details.
+        <div class="quick-grid">
+          <div class="quick-chip" onclick="document.getElementById('searchEmail').value='gvijayalaxmi0709@gmail.com';searchUser();">
+            <i class="fa-solid fa-bolt"></i> Try a recent scan
+          </div>
+          <div class="quick-chip" onclick="document.getElementById('searchEmail').focus()">
+            <i class="fa-solid fa-keyboard"></i> Use keyboard ↵ to search
+          </div>
+          <div class="quick-chip" onclick="location.href='qr_code_scanner.html'">
+            <i class="fa-solid fa-camera"></i> Or scan a QR instead
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="admin-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  if(!adminEmails.includes(user.email)){window.location.href='../index.html';return;}
+  // Pre-fill from URL ?email=... if provided
+  const params=new URLSearchParams(location.search);
+  const pre=params.get('email')||params.get('q');
+  if(pre){document.getElementById('searchEmail').value=pre;searchUser();}
+});
+
+function searchUser(){
+  const email=document.getElementById('searchEmail').value.trim();
+  const area=document.getElementById('resultsArea');
+  if(!email){
+    area.innerHTML='<div class="notice err"><i class="fa-solid fa-circle-exclamation"></i>Enter an email address.</div>';
+    return;
+  }
+  area.innerHTML='<div class="loading"><span class="spinner"></span> Searching…</div>';
+
+  db.ref('users').orderByChild('email').equalTo(email).once('value').then(snap=>{
+    if(!snap.exists()){
+      area.innerHTML='<div class="empty"><i class="fa-solid fa-circle-xmark"></i>No user found with this email.<br><span style="opacity:0.7;font-size:0.85rem;">Double-check the spelling, or ask the citizen to re-register.</span></div>';
+      return;
+    }
+    snap.forEach(userSnap=>{
+      const userData=userSnap.val();
+      const uid=userSnap.key;
+      const displayName=(userData.email||'').split('@')[0] || 'User';
+      const initial=displayName.charAt(0).toUpperCase() || '?';
+
+      db.ref('users/'+uid+'/trafficdata').once('value').then(tSnap=>{
+        let entriesHTML='<div class="empty" style="padding:24px 12px;"><i class="fa-solid fa-folder-open"></i>No traffic data entries yet for this user.</div>';
+        if(tSnap.exists()){
+          const entries=[];
+          tSnap.forEach(e=>entries.push(e.val()));
+          entries.reverse();
+          entriesHTML=entries.map((e,i)=>`
+            <div class="entry">
+              <div class="entry-head">📄 Entry #${entries.length - i}</div>
+              <div class="field"><label>DL Number</label><span>${escapeHtml(e.dlNumber||'-')}</span></div>
+              <div class="field"><label>RC Number</label><span>${escapeHtml(e.rcNumber||'-')}</span></div>
+              <div class="field"><label>Pollution Cert</label><span>${escapeHtml(e.pollutionNumber||'-')}</span></div>
+              <div class="field"><label>Phone</label><span>${escapeHtml(e.phoneNumber||'-')}</span></div>
+              ${e.fileUrl?`<a href="${e.fileUrl}" target="_blank" class="doc-link"><i class="fa-solid fa-file-arrow-up"></i> View Document</a>`:''}
+            </div>
+          `).join('');
+        }
+        area.innerHTML=`
+          <div class="result-card">
+            <h3><i class="fa-solid fa-circle-check"></i> User Found</h3>
+            <div class="user-banner">
+              <div class="user-avatar">${initial}</div>
+              <div class="user-info">
+                <div class="name">${escapeHtml(displayName)}</div>
+                <div class="email">${escapeHtml(userData.email)}</div>
+              </div>
+            </div>
+            <div class="field"><label>Account Type</label><span>${userData.isAdmin?'<span style="color:var(--neon-amber);font-weight:600;">👮 Officer</span>':'<span style="color:var(--neon-green);font-weight:600;">👤 Citizen</span>'}</span></div>
+            <h4 style="color:#fff;margin:18px 0 12px;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-folder-tree" style="color:var(--saffron);"></i> Traffic Data Entries</h4>
+            ${entriesHTML}
+            <div class="btn-row">
+              <button class="btn btn-amber" onclick="openFlag('${uid}','${userData.email}')"><i class="fa-solid fa-flag"></i> Flag User</button>
+              <button class="btn btn-ghost" onclick="location.href='scan_history.html'"><i class="fa-solid fa-clock-rotate-left"></i> My Scans</button>
+            </div>
+          </div>`;
+      });
+    });
+  }).catch(e=>{
+    area.innerHTML='<div class="notice err"><i class="fa-solid fa-circle-xmark"></i>Search error: '+e.message+'</div>';
+  });
+}
+
+function openFlag(uid,email){
+  const reason=prompt('Flag '+email+' as suspicious.\nEnter reason:','Suspicious behavior');
+  if(!reason)return;
+  const u=auth.currentUser;
+  if(!u)return;
+  db.ref('watchlist/'+u.uid+'/'+uid).set({
+    userUid:uid,userEmail:email,reason:reason,notes:'',
+    flaggedBy:u.email,flaggedAt:Date.now(),flaggedAtReadable:new Date().toLocaleString()
+  }).then(()=>toast(email+' added to your watchlist','ok'));
+}
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>

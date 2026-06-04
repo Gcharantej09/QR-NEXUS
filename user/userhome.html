@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard · QR Nexus Citizen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+/* Hero greeting with civic score chip */
+.hero{
+  background:linear-gradient(135deg,#FF6B00 0%,#FF8C42 50%,#FFB46B 100%);
+  color:#fff;padding:30px 22px 90px;position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:rgba(255,255,255,0.10);border-radius:50%;}
+.hero::after{content:'';position:absolute;bottom:-100px;left:-50px;width:240px;height:240px;background:rgba(255,255,255,0.06);border-radius:50%;}
+.hero-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1;}
+.hero h2{font-size:1.6rem;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.hero .welcome-line{font-size:0.95rem;opacity:0.95;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.user-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.22);padding:4px 12px;border-radius:999px;font-size:0.78rem;backdrop-filter:blur(8px);font-weight:500;}
+.user-pill i{color:#1FB81F;}
+
+/* Civic Score ring */
+.score-card{
+  position:relative;z-index:3;margin:-60px auto 0;max-width:1080px;padding:0 22px;
+}
+.score-inner{
+  background:#fff;border-radius:20px;padding:18px 22px;
+  box-shadow:0 12px 32px rgba(255,107,0,0.12);
+  display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;
+  border:1px solid var(--cit-line-2);
+}
+.score-ring{position:relative;width:96px;height:96px;flex-shrink:0;}
+.score-ring svg{transform:rotate(-90deg);width:100%;height:100%;}
+.score-ring .ring-bg{fill:none;stroke:#FFE5CC;stroke-width:8;}
+.score-ring .ring-fg{fill:none;stroke:url(#scoreGrad);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.4s var(--ease-out);}
+.score-ring .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-ring .center .num{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;line-height:1;color:var(--cit-text);}
+.score-ring .center .lbl{font-size:0.55rem;color:var(--cit-mute);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;}
+.score-meta .tier{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:999px;font-size:0.78rem;font-weight:700;letter-spacing:0.04em;
+  margin-bottom:6px;
+}
+.score-meta h3{font-size:1.05rem;display:flex;align-items:center;gap:6px;font-family:var(--font-display);}
+.score-meta p{color:var(--cit-mute);font-size:0.82rem;margin-top:2px;line-height:1.5;}
+.score-tip{font-size:0.75rem;color:var(--cit-saffron);font-weight:600;display:flex;align-items:center;gap:4px;}
+
+/* Stat tiles */
+.stat-row{max-width:1080px;margin:18px auto 0;padding:0 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;position:relative;z-index:2;}
+.stat-tile{
+  background:#fff;border-radius:14px;padding:16px 14px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.05);
+  display:flex;align-items:center;gap:12px;border-left:4px solid var(--cit-saffron);
+  transition:all var(--t) var(--ease);
+}
+.stat-tile:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,0.10);}
+.stat-tile.green{border-left-color:var(--cit-green);}
+.stat-tile.red{border-left-color:var(--cit-red);}
+.stat-tile.navy{border-left-color:var(--cit-navy);}
+.stat-tile .icon{width:42px;height:42px;border-radius:10px;background:#FFF4E0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--cit-saffron);flex-shrink:0;}
+.stat-tile.green .icon{background:#E8F8E8;color:var(--cit-green);}
+.stat-tile.red .icon{background:#FFE8EA;color:var(--cit-red);}
+.stat-tile.navy .icon{background:#E8E8F8;color:var(--cit-navy);}
+.stat-tile .num{font-family:var(--font-mono);font-size:1.4rem;font-weight:700;line-height:1.1;color:var(--cit-text);}
+.stat-tile .label{font-size:0.7rem;color:var(--cit-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;font-weight:600;}
+
+/* Renewal alert strip */
+.alerts-strip{
+  max-width:1080px;margin:18px auto 0;padding:0 22px;display:flex;flex-direction:column;gap:8px;
+}
+.alert-item{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#FFF8E8 0%, #FFF4E0 100%);
+  border:1px solid rgba(255,107,0,0.20);border-left:4px solid var(--cit-saffron);
+  border-radius:12px;padding:10px 14px;font-size:0.85rem;color:var(--cit-text);
+  animation:slideIn 0.4s var(--ease-out) both;
+}
+.alert-item.urgent{background:linear-gradient(135deg,#FFE8EA,#FFD0D5);border-color:rgba(255,71,87,0.30);border-left-color:var(--cit-red);}
+.alert-item.ok{background:linear-gradient(135deg,#E8F8E8,#D8F0D8);border-color:rgba(19,136,8,0.30);border-left-color:var(--cit-green);}
+.alert-item .ico{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;color:var(--cit-saffron);flex-shrink:0;}
+.alert-item.urgent .ico{color:var(--cit-red);}
+.alert-item.ok .ico{color:var(--cit-green);}
+.alert-item .body{flex:1;}
+.alert-item .body strong{color:var(--cit-saffron);font-weight:700;}
+.alert-item.urgent .body strong{color:var(--cit-red);}
+.alert-item .meta{font-size:0.72rem;color:var(--cit-mute);}
+@keyframes slideIn{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:translateX(0);}}
+
+/* Main */
+.main-content{max-width:1080px;margin:0 auto;padding:24px 22px 80px;width:100%;}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title h3{font-size:1.15rem;display:flex;align-items:center;gap:8px;font-family:var(--font-display);}
+.section-title h3 .accent-bar{width:4px;height:18px;background:linear-gradient(180deg,var(--cit-saffron),var(--cit-green));border-radius:2px;}
+.section-title .meta{font-size:0.78rem;color:var(--cit-mute);}
+
+/* Action grid */
+.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
+.action-card{
+  background:#fff;border-radius:14px;padding:22px 18px;text-align:center;cursor:pointer;
+  transition:all var(--t) var(--ease);
+  box-shadow:0 4px 12px rgba(0,0,0,0.04);
+  border:1.5px solid transparent;position:relative;overflow:hidden;text-decoration:none;color:inherit;display:block;
+}
+.action-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cit-saffron),var(--cit-green));transform:scaleX(0);transform-origin:left;transition:transform var(--t) var(--ease);}
+.action-card:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(255,107,0,0.12);border-color:rgba(255,107,0,0.20);}
+.action-card:hover::before{transform:scaleX(1);}
+.action-card .ico{width:54px;height:54px;border-radius:14px;background:#FFF4E0;display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--cit-saffron);margin-bottom:12px;transition:all var(--t) var(--ease);}
+.action-card:hover .ico{background:linear-gradient(135deg,var(--cit-saffron),#FF8C42);color:#fff;transform:scale(1.05) rotate(-3deg);}
+.action-card h4{font-size:0.95rem;margin-bottom:4px;color:var(--cit-text);font-family:var(--font-display);}
+.action-card p{font-size:0.75rem;color:var(--cit-mute);line-height:1.4;margin:0;}
+.action-card.featured{background:linear-gradient(135deg,var(--cit-saffron),#FF8C42);color:#fff;}
+.action-card.featured .ico{background:rgba(255,255,255,0.20);color:#fff;}
+.action-card.featured p{color:rgba(255,255,255,0.90);}
+
+/* Reminder card */
+.quick-banner{
+  background:linear-gradient(135deg,#FFF8E8 0%,#FFE8D0 100%);
+  border:1px solid var(--cit-saffron);border-left:4px solid var(--cit-saffron);
+  border-radius:14px;padding:14px 18px;margin-bottom:18px;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.quick-banner i{color:var(--cit-saffron);font-size:1.2rem;margin-top:2px;}
+.quick-banner .text{flex:1;font-size:0.88rem;color:var(--cit-text);}
+.quick-banner .text strong{color:#B85A00;}
+
+@media(max-width:780px){
+  .hero{padding:24px 16px 80px;}
+  .hero h2{font-size:1.3rem;}
+  .score-inner{grid-template-columns:auto 1fr;gap:14px;}
+  .score-tip{grid-column:1/-1;}
+  .stat-row{padding:0 16px;}
+  .main-content{padding:20px 16px 80px;}
+  .alerts-strip{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h2 id="greeting">Namaste 👋</h2>
+      <div class="welcome-line">
+        <span>Welcome back,</span>
+        <span class="user-pill"><i class="fa-solid fa-circle-check"></i> Verified Citizen</span>
+      </div>
+      <p id="userEmail" style="margin-top:8px;font-size:0.88rem;opacity:0.92;word-break:break-all;">Loading…</p>
+    </div>
+  </section>
+
+  <!-- CIVIC SCORE -->
+  <div class="score-card">
+    <div class="score-inner">
+      <div class="score-ring">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FF6B00"/>
+              <stop offset="100%" stop-color="#138808"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="50" cy="50" r="42"/>
+          <circle class="ring-fg" id="scoreRingFg" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/>
+        </svg>
+        <div class="center">
+          <div class="num" id="scoreNum">—</div>
+          <div class="lbl">Score</div>
+        </div>
+      </div>
+      <div class="score-meta">
+        <span class="tier" id="tierPill" style="background:rgba(255,176,32,0.15);color:#C77B30;"><i class="fa-solid fa-award"></i> Computing…</span>
+        <h3>Your <span style="color:var(--cit-saffron);">Civic Score</span></h3>
+        <p id="scoreSummary">A Government of India rating based on your driving record, document renewals &amp; challan payments.</p>
+      </div>
+      <div class="score-tip" id="scoreTip">
+        <i class="fa-solid fa-lightbulb"></i> <span>Loading…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RENEWAL ALERTS -->
+  <div class="alerts-strip" id="alertsStrip"></div>
+
+  <!-- QUICK STATS -->
+  <div class="stat-row">
+    <div class="stat-tile">
+      <div class="icon"><i class="fa-solid fa-car"></i></div>
+      <div>
+        <div class="num" id="vehicleCount">0</div>
+        <div class="label">Vehicles</div>
+      </div>
+    </div>
+    <div class="stat-tile green">
+      <div class="icon"><i class="fa-solid fa-qrcode"></i></div>
+      <div>
+        <div class="num" id="qrCount">0</div>
+        <div class="label">QR Codes</div>
+      </div>
+    </div>
+    <div class="stat-tile red">
+      <div class="icon"><i class="fa-solid fa-receipt"></i></div>
+      <div>
+        <div class="num" id="challanCount">0</div>
+        <div class="label">Pending Challans</div>
+      </div>
+    </div>
+    <div class="stat-tile navy">
+      <div class="icon"><i class="fa-solid fa-file-circle-check"></i></div>
+      <div>
+        <div class="num" id="appCount">0</div>
+        <div class="label">Applications</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <div class="quick-banner">
+      <i class="fa-solid fa-circle-info"></i>
+      <div class="text">
+        <strong>Demo Notice:</strong> This is a Government of India traffic department demo. All your data is stored securely in Firebase and only authorized traffic officers can scan your QR.
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h3><span class="accent-bar"></span>Quick Actions</h3>
+      <div class="meta">8 services available</div>
+    </div>
+
+    <div class="action-grid">
+      <div class="action-card featured" onclick="location.href='getqr.html'">
+        <div class="ico"><i class="fa-solid fa-qrcode"></i></div>
+        <h4>Generate QR</h4>
+        <p>Create your digital vehicle document</p>
+      </div>
+      <div class="action-card" onclick="location.href='qrcode.html'">
+        <div class="ico"><i class="fa-solid fa-id-card"></i></div>
+        <h4>My QR Code</h4>
+        <p>View and download your QR</p>
+      </div>
+      <div class="action-card" onclick="location.href='share.html'">
+        <div class="ico"><i class="fa-solid fa-share-nodes"></i></div>
+        <h4>Share</h4>
+        <p>Send to WhatsApp, Email</p>
+      </div>
+      <div class="action-card" onclick="location.href='my_vehicles.html'">
+        <div class="ico"><i class="fa-solid fa-car-side"></i></div>
+        <h4>My Vehicles</h4>
+        <p>Manage all your vehicles</p>
+      </div>
+      <div class="action-card" onclick="location.href='twowheeler_license.html'">
+        <div class="ico"><i class="fa-solid fa-motorcycle"></i></div>
+        <h4>2W License</h4>
+        <p>Apply for learning / permanent DL</p>
+      </div>
+      <div class="action-card" onclick="location.href='challans.html'">
+        <div class="ico"><i class="fa-solid fa-receipt"></i></div>
+        <h4>My Challans</h4>
+        <p>View, pay or dispute fines</p>
+      </div>
+      <div class="action-card" onclick="location.href='schemes.html'">
+        <div class="ico"><i class="fa-solid fa-landmark"></i></div>
+        <h4>Govt Schemes</h4>
+        <p>18+ services &amp; subsidies</p>
+      </div>
+      <div class="action-card" onclick="location.href='aboutus.html'">
+        <div class="ico"><i class="fa-solid fa-circle-info"></i></div>
+        <h4>About</h4>
+        <p>Learn more about QR Nexus</p>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="citizen-topbar.js"></script>
+<script src="civic-score.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+let currentUser=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  currentUser=user;
+  document.getElementById('userEmail').textContent=user.email;
+  setGreeting();
+  loadStats();
+  loadScore();
+  loadAlerts();
+});
+
+function setGreeting(){
+  const h=new Date().getHours();
+  let g='Namaste',e='👋';
+  if(h<12){g='Good Morning';e='🌅';}
+  else if(h<17){g='Good Afternoon';e='☀️';}
+  else if(h<21){g='Good Evening';e='🌆';}
+  else{g='Good Night';e='🌙';}
+  document.getElementById('greeting').textContent=`${g} ${e}`;
+}
+
+function loadStats(){
+  const uid=currentUser.uid;
+  db.ref('vehicles/'+uid).once('value').then(s=>{
+    document.getElementById('vehicleCount').textContent=s.numChildren();
+  });
+  db.ref('users/'+uid+'/trafficdata').once('value').then(s=>{
+    document.getElementById('qrCount').textContent=s.numChildren();
+  });
+  db.ref('challans/'+uid).orderByChild('status').equalTo('pending').once('value').then(s=>{
+    document.getElementById('challanCount').textContent=s.numChildren();
+  });
+  Promise.all([
+    db.ref('licenseApplications/'+uid).once('value'),
+    db.ref('applications/'+uid).once('value')
+  ]).then(([a,b])=>{
+    document.getElementById('appCount').textContent=(a.numChildren()||0)+(b.numChildren()||0);
+  });
+}
+
+async function loadScore(){
+  const result=await CivicScore.compute(currentUser.uid,db);
+  const ring=document.getElementById('scoreRingFg');
+  const C=264;
+  const target=C-(C*result.score/1000);
+  // animate
+  const t0=performance.now(),dur=1400;
+  function step(t){
+    const p=Math.min(1,(t-t0)/dur);
+    const eased=1-Math.pow(1-p,3);
+    ring.style.strokeDashoffset=C-(C*result.score/1000)*eased;
+    document.getElementById('scoreNum').textContent=Math.floor(result.score*eased);
+    if(p<1) requestAnimationFrame(step);
+    else document.getElementById('scoreNum').textContent=result.score;
+  }
+  requestAnimationFrame(step);
+
+  // tier
+  const tier=result.tier;
+  const pill=document.getElementById('tierPill');
+  pill.innerHTML=`<i class="fa-solid ${tier.icon}"></i> ${tier.name} Citizen`;
+  pill.style.background=tier.color+'22';
+  pill.style.color=tier.color;
+
+  // summary & tip
+  const positives=result.reasons.filter(r=>r.p>0).slice(0,2);
+  const negatives=result.reasons.filter(r=>r.p<0).sort((a,b)=>a.p-b.p).slice(0,1);
+  if(negatives.length){
+    document.getElementById('scoreSummary').textContent='To improve: '+negatives[0].t;
+  }else if(positives.length){
+    document.getElementById('scoreSummary').textContent='Keep it up! '+positives.map(p=>p.t).join(', ');
+  }else{
+    document.getElementById('scoreSummary').textContent='A perfect record. Keep renewing on time!';
+  }
+  document.getElementById('scoreTip').innerHTML=`<i class="fa-solid fa-lightbulb"></i> <span>Tier ${tier.name} · benefits include priority RTO slots &amp; insurance discounts</span>`;
+}
+
+async function loadAlerts(){
+  const strip=document.getElementById('alertsStrip');
+  const items=[];
+  const vSnap=await db.ref('vehicles/'+currentUser.uid).once('value');
+  const vehicles=vSnap.val()||{};
+  const now=Date.now();
+  Object.values(vehicles).forEach(v=>{
+    if(v.insurance){
+      const exp=new Date(v.insurance).getTime();
+      const days=Math.round((exp-now)/86400000);
+      if(days<0) items.push({urgent:true,ico:'fa-triangle-exclamation',title:'Lapsed insurance',meta:v.rc+' · expired '+Math.abs(days)+' days ago',link:'my_vehicles.html'});
+      else if(days<30) items.push({urgent:true,ico:'fa-clock',title:'Insurance expiring soon',meta:v.rc+' · '+days+' days left',link:'my_vehicles.html'});
+    }
+    if(v.puc){
+      const exp=new Date(v.puc).getTime();
+      const days=Math.round((exp-now)/86400000);
+      if(days<0) items.push({urgent:true,ico:'fa-smog',title:'PUC certificate expired',meta:v.rc+' · expired '+Math.abs(days)+' days ago',link:'my_vehicles.html'});
+      else if(days<30) items.push({urgent:false,ico:'fa-clock',title:'PUC renewing soon',meta:v.rc+' · '+days+' days left',link:'my_vehicles.html'});
+    }
+  });
+  const cSnap=await db.ref('challans/'+currentUser.uid).orderByChild('status').equalTo('pending').once('value');
+  if(cSnap.exists()){
+    let amt=0;
+    cSnap.forEach(c=>amt+=c.val().amount||0);
+    items.push({urgent:true,ico:'fa-receipt',title:cSnap.numChildren()+' pending challan(s)',meta:'Total ₹'+amt.toLocaleString('en-IN')+' due',link:'challans.html'});
+  }
+  if(!items.length){
+    items.push({urgent:false,ok:true,ico:'fa-shield-check',title:'All your documents are valid',meta:'No pending renewals or challans',link:''});
+  }
+  strip.innerHTML=items.map((it,i)=>`
+    <a class="alert-item ${it.urgent?'urgent':''} ${it.ok?'ok':''}" ${it.link?`href="${it.link}"`:''} style="animation-delay:${i*80}ms;text-decoration:none;color:inherit;cursor:${it.link?'pointer':'default'};">
+      <div class="ico"><i class="fa-solid ${it.ico}"></i></div>
+      <div class="body">
+        <strong>${it.title}</strong>
+        <div class="meta">${it.meta}</div>
+      </div>
+      ${it.link?`<i class="fa-solid fa-chevron-right" style="color:var(--cit-mute);font-size:0.8rem;"></i>`:''}
+    </a>`).join('');
+}
+</script>
+</body>
+</html>

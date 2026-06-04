@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Challan Records · QR Nexus Officer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="admin.css">
+<style>
+.challan-card{
+  background:linear-gradient(160deg, rgba(255,176,32,0.05), rgba(255,255,255,0.01));
+  border:1px solid var(--console-line);border-left:4px solid var(--neon-amber);
+  border-radius:14px;padding:16px 18px;margin-bottom:12px;
+  display:grid;grid-template-columns:60px 1fr auto;gap:14px;align-items:center;
+  transition:all var(--t) var(--ease);
+}
+.challan-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,0.4);border-color:rgba(255,176,32,0.4);}
+.challan-amount{
+  width:60px;height:60px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(255,176,32,0.2),rgba(255,107,0,0.15));
+  border:1px solid rgba(255,176,32,0.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;font-family:var(--font-mono);font-weight:700;
+}
+.challan-amount .sym{font-size:0.6rem;opacity:0.7;}
+.challan-amount .num{font-size:0.95rem;line-height:1;}
+.challan-body .type{font-size:0.98rem;color:#fff;font-weight:600;margin-bottom:4px;}
+.challan-body .sub{font-size:0.78rem;color:var(--console-mute);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.challan-body .desc{font-size:0.82rem;color:var(--console-mute);margin-top:6px;line-height:1.5;}
+.challan-meta{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+.status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:10px;
+  font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+}
+.status-pill.pending{background:rgba(255,176,32,0.15);color:var(--neon-amber);border:1px solid rgba(255,176,32,0.3);}
+.status-pill.paid{background:rgba(31,184,31,0.15);color:var(--neon-green);border:1px solid rgba(31,184,31,0.3);}
+.status-pill.disputed{background:rgba(255,71,87,0.15);color:var(--neon-red);border:1px solid rgba(255,71,87,0.3);}
+
+.filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.filter-tab{
+  padding:8px 14px;border-radius:10px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--console-line);
+  color:var(--console-mute);font-size:0.78rem;font-weight:600;cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+}
+.filter-tab:hover{background:rgba(0,229,255,0.10);color:var(--neon-cyan);border-color:rgba(0,229,255,0.3);}
+.filter-tab.active{background:linear-gradient(135deg,var(--saffron),#FF8C42);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(255,107,0,0.3);}
+.filter-tab .count{background:rgba(255,255,255,0.15);padding:1px 7px;border-radius:8px;margin-left:6px;font-family:var(--font-mono);font-size:0.7rem;}
+
+@media(max-width:640px){
+  .challan-card{grid-template-columns:50px 1fr;gap:10px;}
+  .challan-meta{grid-column:1 / -1;text-align:left;align-items:flex-start;}
+  .challan-amount{width:50px;height:50px;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="adminTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-receipt"></i> Challan Records</h2>
+        <div class="sub">All challans issued by you, with status &amp; filter.</div>
+      </div>
+      <a class="back-link" href="adminhome.html"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card" style="--bar:var(--neon-amber);">
+        <div class="label">Pending</div>
+        <div class="num" id="statPending">0</div>
+      </div>
+      <div class="stat-card" style="--bar:var(--neon-green);">
+        <div class="label">Paid</div>
+        <div class="num" id="statPaid">0</div>
+      </div>
+      <div class="stat-card" style="--bar:var(--neon-red);">
+        <div class="label">Disputed</div>
+        <div class="num" id="statDisputed">0</div>
+      </div>
+      <div class="stat-card" style="--bar:var(--neon-cyan);">
+        <div class="label">Total Collected</div>
+        <div class="num" id="statAmount">₹0</div>
+      </div>
+    </div>
+
+    <div class="filter-tabs">
+      <div class="filter-tab active" data-filter="all" onclick="setFilter('all',this)">All <span class="count" id="cntAll">0</span></div>
+      <div class="filter-tab" data-filter="pending" onclick="setFilter('pending',this)">Pending <span class="count" id="cntPending">0</span></div>
+      <div class="filter-tab" data-filter="paid" onclick="setFilter('paid',this)">Paid <span class="count" id="cntPaid">0</span></div>
+      <div class="filter-tab" data-filter="disputed" onclick="setFilter('disputed',this)">Disputed <span class="count" id="cntDisputed">0</span></div>
+    </div>
+
+    <div id="challanList"><div class="loading"><span class="spinner"></span> Loading challans…</div></div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="admin-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+
+let currentOfficer=null;
+let allChallans=[];
+let currentFilter='all';
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  if(!adminEmails.includes(user.email)){window.location.href='../index.html';return;}
+  currentOfficer=user;
+  loadChallans();
+});
+
+function loadChallans(){
+  db.ref('challans').once('value').then(snap=>{
+    allChallans=[];
+    snap.forEach(userNode=>{
+      userNode.forEach(c=>{
+        const v=c.val();
+        if(v.issuedBy===currentOfficer.email){
+          allChallans.push({id:c.key,userUid:userNode.key,...v});
+        }
+      });
+    });
+    allChallans.sort((a,b)=>(b.issuedAt||0)-(a.issuedAt||0));
+    updateStats();
+    renderList();
+  });
+}
+
+function updateStats(){
+  let pending=0,paid=0,disputed=0,total=0;
+  allChallans.forEach(c=>{
+    if(c.status==='paid'){paid++;total+=c.amount||0;}
+    else if(c.status==='disputed') disputed++;
+    else pending++;
+  });
+  document.getElementById('statPending').textContent=pending;
+  document.getElementById('statPaid').textContent=paid;
+  document.getElementById('statDisputed').textContent=disputed;
+  document.getElementById('statAmount').textContent='₹'+total.toLocaleString('en-IN');
+  document.getElementById('cntAll').textContent=allChallans.length;
+  document.getElementById('cntPending').textContent=pending;
+  document.getElementById('cntPaid').textContent=paid;
+  document.getElementById('cntDisputed').textContent=disputed;
+}
+
+function setFilter(f,el){
+  currentFilter=f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderList();
+}
+
+function renderList(){
+  const list=document.getElementById('challanList');
+  let items=allChallans;
+  if(currentFilter!=='all') items=items.filter(c=>(c.status||'pending')===currentFilter);
+
+  if(items.length===0){
+    list.innerHTML='<div class="empty"><i class="fa-solid fa-receipt"></i>No challans in this filter.<br><span style="opacity:0.7;font-size:0.85rem;">Issue a challan from the Watchlist or Scan result.</span></div>';
+    return;
+  }
+  list.innerHTML=items.map(c=>{
+    const status=c.status||'pending';
+    const icon=status==='paid'?'fa-circle-check':(status==='disputed'?'fa-circle-xmark':'fa-clock');
+    return `
+      <div class="challan-card" data-status="${status}">
+        <div class="challan-amount">
+          <span class="sym">₹</span>
+          <span class="num">${(c.amount||0).toLocaleString('en-IN')}</span>
+        </div>
+        <div class="challan-body">
+          <div class="type">${escapeHtml(c.violationType||'Violation')}</div>
+          <div class="sub">
+            <i class="fa-solid fa-car"></i> ${escapeHtml(c.vehicleRC||'—')}
+            <span>·</span>
+            <i class="fa-regular fa-clock"></i> ${escapeHtml(c.issuedAtReadable||new Date(c.issuedAt).toLocaleString())}
+            ${c.autoGenerated?'<span>·</span><span style="color:var(--neon-cyan);"><i class="fa-solid fa-bolt"></i> Auto</span>':''}
+          </div>
+          ${c.description?`<div class="desc">${escapeHtml(c.description)}</div>`:''}
+        </div>
+        <div class="challan-meta">
+          <span class="status-pill ${status}"><i class="fa-solid ${icon}"></i> ${status}</span>
+          <div style="font-size:0.7rem;color:var(--console-mute);font-family:var(--font-mono);">#${(c.challanId||c.id).slice(-6).toUpperCase()}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>

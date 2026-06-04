@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About QR Nexus · Citizen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="citizen.css">
+<style>
+.about-card{max-width:680px;margin:0 auto;background:#fff;border:1px solid var(--cit-line-2);border-radius:20px;padding:36px;box-shadow:0 8px 28px rgba(0,0,0,0.06);position:relative;overflow:hidden;}
+.about-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--cit-saffron),var(--cit-green),var(--cit-saffron));background-size:200% 100%;animation:grad 4s linear infinite;}
+@keyframes grad{from{background-position:0 0;}to{background-position:200% 0;}}
+.about-card h2{font-size:1.6rem;margin-bottom:14px;color:var(--cit-text);display:flex;align-items:center;gap:10px;font-family:var(--font-display);}
+.about-card h2 i{color:var(--cit-saffron);}
+.about-card p{color:#4B463E;line-height:1.7;margin-bottom:14px;font-size:0.95rem;}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0;}
+.feat{background:var(--cit-bg-2);border:1px solid var(--cit-line-2);border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;transition:all var(--t) var(--ease);}
+.feat:hover{background:rgba(255,107,0,0.06);border-color:rgba(255,107,0,0.30);transform:translateY(-2px);}
+.feat .ico{width:42px;height:42px;border-radius:10px;background:rgba(255,107,0,0.12);color:var(--cit-saffron);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.feat .body .t{font-size:0.88rem;font-weight:700;color:var(--cit-text);}
+.feat .body .s{font-size:0.75rem;color:var(--cit-mute);margin-top:2px;}
+.govt-strip{display:flex;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(135deg,#FFF8E8,#FFF);border:1px solid var(--cit-saffron);border-radius:12px;margin-top:18px;}
+.govt-strip .ashoka{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--cit-saffron),#FF8C42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+.govt-strip .text{font-size:0.82rem;color:var(--cit-text);}
+.govt-strip .text strong{color:#B85A00;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="citizenTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-circle-info"></i> About QR Nexus</h2>
+        <div class="sub">A Government of India digital traffic document initiative.</div>
+      </div>
+      <a class="back-link" href="userhome.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="about-card">
+      <h2><i class="fa-solid fa-qrcode"></i> About QR Nexus</h2>
+      <p><strong>QR Nexus</strong> is a smart traffic document management system designed to make vehicle document verification faster, paperless, and trustworthy — for every citizen of India.</p>
+      <p>Citizens can store their driving license, RC, and pollution certificate details in a secure QR code. Traffic officers can instantly scan and verify these documents on the spot — with no paperwork, no queues, and no delays.</p>
+      <p>Built with <strong>Firebase</strong> for secure, real-time data management and <strong>256-bit AES encryption</strong> for citizen privacy.</p>
+
+      <div class="feature-grid">
+        <div class="feat"><div class="ico"><i class="fa-solid fa-lock"></i></div><div class="body"><div class="t">256-bit Encrypted</div><div class="s">Your data is safe</div></div></div>
+        <div class="feat"><div class="ico"><i class="fa-solid fa-bolt"></i></div><div class="body"><div class="t">Instant Verify</div><div class="s">One scan, all data</div></div></div>
+        <div class="feat"><div class="ico"><i class="fa-solid fa-flag"></i></div><div class="body"><div class="t">Made for India</div><div class="s">All states supported</div></div></div>
+        <div class="feat"><div class="ico"><i class="fa-solid fa-medal"></i></div><div class="body"><div class="t">Civic Score</div><div class="s">Earn for good behaviour</div></div></div>
+      </div>
+
+      <div class="govt-strip">
+        <div class="ashoka"><i class="fa-solid fa-landmark"></i></div>
+        <div class="text">
+          <div><strong>Ministry of Road Transport &amp; Highways</strong></div>
+          <div>Government of India · Digital India Initiative</div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:20px;">
+        <a class="back-link" href="userhome.html" style="background:transparent;border:none;box-shadow:none;"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="citizen-topbar.js"></script>
+</body>
+</html>

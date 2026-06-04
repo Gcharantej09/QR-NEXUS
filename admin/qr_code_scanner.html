@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Scanner · QR Nexus Officer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="admin.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+.scanner-wrap{position:relative;border-radius:14px;overflow:hidden;background:rgba(0,0,0,0.3);min-height:280px;}
+#reader{width:100%;min-height:280px;}
+#reader video{border-radius:12px;}
+#reader__dashboard_section_csr button{
+  background:linear-gradient(135deg,var(--saffron),#FF8C42)!important;
+  color:#fff!important;border:none!important;padding:8px 16px!important;
+  border-radius:8px!important;font-weight:600!important;cursor:pointer;
+}
+#reader__dashboard_section_csr span{color:#fff!important;}
+.scanner-overlay{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+.scanner-frame{
+  width:240px;height:240px;border:2px solid rgba(0,229,255,0.6);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(6,10,26,0.55), 0 0 24px rgba(0,229,255,0.4);
+  position:relative;
+}
+.scanner-frame::before,.scanner-frame::after{
+  content:'';position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);
+  animation:scanLine 2.4s var(--ease) infinite;
+}
+.scanner-frame::before{top:0;}
+.scanner-frame::after{bottom:0;animation-delay:1.2s;}
+@keyframes scanLine{0%{transform:translateY(0);opacity:0.2;}50%{transform:translateY(238px);opacity:1;}100%{transform:translateY(0);opacity:0.2;}}
+.corner{position:absolute;width:24px;height:24px;border:3px solid var(--saffron);}
+.corner.tl{top:-2px;left:-2px;border-right:none;border-bottom:none;border-top-left-radius:8px;}
+.corner.tr{top:-2px;right:-2px;border-left:none;border-bottom:none;border-top-right-radius:8px;}
+.corner.bl{bottom:-2px;left:-2px;border-right:none;border-top:none;border-bottom-left-radius:8px;}
+.corner.br{bottom:-2px;right:-2px;border-left:none;border-top:none;border-bottom-right-radius:8px;}
+
+.status{text-align:center;color:var(--console-text);font-size:0.9rem;margin-top:14px;min-height:22px;display:flex;align-items:center;justify-content:center;gap:8px;}
+
+.upload-area{
+  background:rgba(255,255,255,0.04);border:1.5px dashed var(--console-line);
+  border-radius:14px;padding:18px;text-align:center;
+  transition:all var(--t) var(--ease);
+}
+.upload-area:hover{border-color:rgba(0,229,255,0.4);background:rgba(0,229,255,0.05);}
+.upload-area p{color:var(--console-mute);font-size:0.88rem;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.file-label{
+  display:inline-block;padding:10px 20px;border:1.5px solid var(--console-line);
+  border-radius:var(--r-pill);background:rgba(255,255,255,0.04);
+  color:var(--console-text);font-size:0.85rem;font-weight:600;cursor:pointer;
+  transition:all var(--t-fast) var(--ease);
+}
+.file-label:hover{background:var(--neon-cyan);color:#0A0F25;border-color:var(--neon-cyan);}
+input[type=file]{display:none;}
+
+.result-card{
+  background:linear-gradient(160deg, rgba(31,184,31,0.06), rgba(0,229,255,0.04));
+  border:1px solid rgba(31,184,31,0.3);border-radius:16px;
+  padding:22px;margin-top:18px;display:none;
+  position:relative;overflow:hidden;
+}
+.result-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan),var(--saffron));
+}
+.result-card h3{color:var(--neon-green);font-size:1.15rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.user-banner{display:flex;align-items:center;gap:12px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);padding:12px 14px;border-radius:12px;margin-bottom:16px;}
+.user-avatar{
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,var(--saffron),#000080);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:1.15rem;font-weight:700;
+}
+.user-info{flex:1;}
+.user-info .name{font-weight:600;color:#fff;font-size:0.95rem;}
+.user-info .email{font-size:0.78rem;color:var(--console-mute);word-break:break-all;}
+.field{margin-bottom:10px;}
+.field label{font-size:0.7rem;color:var(--console-mute);display:block;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;font-weight:600;}
+.field span{font-size:0.95rem;color:#fff;font-weight:500;word-break:break-all;}
+.doc-section{margin-top:14px;padding:12px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid var(--console-line);}
+.doc-label{font-size:0.7rem;color:var(--console-mute);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+.doc-img{max-width:100%;max-height:300px;border-radius:8px;display:block;border:1px solid var(--console-line);}
+.doc-link{color:var(--neon-cyan);font-size:0.85rem;text-decoration:none;display:inline-block;margin-top:6px;font-weight:600;}
+.doc-link:hover{text-decoration:underline;}
+
+.help-card{
+  background:rgba(255,176,32,0.06);border:1px solid rgba(255,176,32,0.25);
+  border-radius:12px;padding:12px 14px;margin-top:12px;font-size:0.82rem;
+}
+.help-card h4{color:var(--neon-amber);font-size:0.85rem;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.help-card ol{padding-left:20px;color:var(--console-mute);line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="adminTopbar"></div>
+  <div class="page">
+
+    <div class="page-head">
+      <div>
+        <h2><i class="fa-solid fa-camera-retro"></i> QR Code Scanner</h2>
+        <div class="sub">Scan citizen QR codes to instantly verify traffic documents.</div>
+      </div>
+      <a class="back-link" href="adminhome.html"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+    </div>
+
+    <div class="panel">
+      <div class="scanner-wrap">
+        <div id="reader"></div>
+        <div class="scanner-overlay" id="overlay" style="display:none;">
+          <div class="scanner-frame">
+            <span class="corner tl"></span><span class="corner tr"></span>
+            <span class="corner bl"></span><span class="corner br"></span>
+          </div>
+        </div>
+      </div>
+      <div class="status" id="status"><i class="fa-solid fa-circle-info" style="color:var(--neon-cyan);"></i> Click <b style="color:var(--neon-cyan);">Allow Camera</b> below to start scanning</div>
+      <div class="help-card" id="helpCard" style="display:none;">
+        <h4><i class="fa-solid fa-circle-exclamation"></i> Camera not working?</h4>
+        <ol>
+          <li>Click the <b>lock / camera icon</b> 🔒 in the browser address bar (left of the URL).</li>
+          <li>Set <b>Camera</b> permission to <b>Allow</b>.</li>
+          <li>Close any other tabs/apps using your camera (Zoom, Meet, other scanners).</li>
+          <li>Click the <b>Allow Camera</b> button again.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-success btn-block" id="allowCamBtn" onclick="requestCamera()">
+        <i class="fa-solid fa-camera"></i> <span id="allowCamTxt">Allow Camera & Start Scanning</span>
+      </button>
+    </div>
+
+    <div class="upload-area" style="margin-top:16px;">
+      <p><i class="fa-solid fa-folder-open"></i> Or upload a QR image (no camera needed)</p>
+      <input type="file" id="qrFileInput" accept="image/*" onchange="handleFileUpload(event)">
+      <label for="qrFileInput" class="file-label"><i class="fa-solid fa-upload"></i> Choose QR Image…</label>
+    </div>
+
+    <div class="result-card" id="resultCard">
+      <h3><i class="fa-solid fa-circle-check"></i> Document Verified</h3>
+      <div class="user-banner">
+        <div class="user-avatar" id="r-avatar">?</div>
+        <div class="user-info">
+          <div class="name" id="r-userName">Loading…</div>
+          <div class="email" id="r-userEmail"></div>
+        </div>
+      </div>
+      <div class="field"><label>Driving License Number</label><span id="r-dl">-</span></div>
+      <div class="field"><label>Vehicle Registration Number</label><span id="r-rc">-</span></div>
+      <div class="field"><label>Pollution Certificate</label><span id="r-pollution">-</span></div>
+      <div class="field"><label>Phone Number</label><span id="r-phone">-</span></div>
+      <div class="field"><label>Scanned At</label><span id="r-time">-</span></div>
+      <div class="field"><label>Citizen's Last Known Location</label><span id="r-citizenLoc">-</span></div>
+      <div class="field"><label>This Scan Location</label><span id="r-officerLoc">Capturing…</span></div>
+      <div id="docSection" class="doc-section" style="display:none">
+        <div class="doc-label">📄 Uploaded Document</div>
+        <img id="r-doc" class="doc-img" src="" alt="Document" crossorigin="anonymous">
+        <a id="r-doc-link" href="#" target="_blank" class="doc-link">Open in new tab →</a>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-amber" style="flex:1;" onclick="flagCurrentUser()"><i class="fa-solid fa-flag"></i> Flag as Suspicious</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="scanAgain()"><i class="fa-solid fa-rotate"></i> Scan Another</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="admin-topbar.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomain:"qr-nexus-81938.firebaseapp.com",databaseURL:"https://qr-nexus-81938-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"qr-nexus-81938",storageBucket:"qr-nexus-81938.firebasestorage.app",messagingSenderId:"597878562208",appId:"1:597878562208:web:acaac02de0078f86e018c5"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+const ENC_KEY='66MXNJUNXTH';
+const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+
+let scanner=null;
+let currentOfficer=null;
+let currentOfficerStation=null;
+let scanned=false;
+let cameraRunning=false;
+let lastScannedData=null;
+let scanStartTs=Date.now();
+
+auth.onAuthStateChanged(user=>{
+  if(!user||!user.emailVerified){window.location.href='../index.html';return;}
+  if(!adminEmails.includes(user.email)){window.location.href='../index.html';return;}
+  currentOfficer=user;
+  db.ref('officers/'+user.uid+'/station').once('value').then(s=>{
+    currentOfficerStation=s.val()||null;
+  });
+  setStatus('Ready. Click "Allow Camera" or upload a QR image.','info');
+});
+
+function setStatus(msg,kind){
+  const el=document.getElementById('status');
+  const icons={ok:'fa-circle-check',err:'fa-circle-xmark',warn:'fa-circle-exclamation',info:'fa-circle-info'};
+  const colors={ok:'var(--neon-green)',err:'var(--neon-red)',warn:'var(--neon-amber)',info:'var(--neon-cyan)'};
+  el.innerHTML=`<i class="fa-solid ${icons[kind]||icons.info}" style="color:${colors[kind]||colors.info};"></i> ${msg}`;
+}
+
+async function requestCamera(){
+  document.getElementById('helpCard').style.display='none';
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    setStatus('Your browser does not support camera. Please use the Upload option below.','err');
+    document.getElementById('helpCard').style.display='block';
+    return;
+  }
+  setStatus('Requesting camera permission…','warn');
+  document.getElementById('allowCamBtn').disabled=true;
+  document.getElementById('allowCamTxt').textContent='Requesting…';
+
+  // First: try to simply start the html5-qrcode scanner. It will prompt internally
+  // and gives a much better error than a pre-flight getUserMedia test (which was
+  // throwing NotReadableError on systems where some other process already touched
+  // the camera).
+  startScanner();
+}
+
+function startScanner(){
+  scanned=false;
+  setStatus('Starting camera…','warn');
+  try{
+    // Stop any previous instance before creating a new one
+    if(scanner){
+      try{scanner.stop().catch(()=>{});}catch(e){}
+      scanner=null;
+    }
+    document.getElementById('reader').innerHTML='';
+    scanner=new Html5Qrcode('reader',{verbose:false});
+  }catch(e){
+    setStatus('Could not init scanner: '+e.message,'err');
+    resetAllowBtn();
+    return;
+  }
+
+  Html5Qrcode.getCameras().then(cameras=>{
+    if(!cameras||cameras.length===0){
+      setStatus('No camera detected. Use the Upload option below.','err');
+      document.getElementById('helpCard').style.display='block';
+      resetAllowBtn();
+      return;
+    }
+    // Prefer back/rear camera for QR scanning
+    const cam=cameras.find(c=>c.label && /back|rear|environment/i.test(c.label))
+            || cameras[cameras.length-1] || cameras[0];
+    setStatus('Scanning with '+(cam.label||'camera')+' — point at a QR code','info');
+
+    const config={fps:10, qrbox:{width:260,height:260}, aspectRatio:1.3333, disableFlip:false};
+    scanner.start(cam.id, config, onScanSuccess, ()=>{})
+      .then(()=>{
+        cameraRunning=true;
+        scanStartTs=Date.now();
+        document.getElementById('allowCamTxt').textContent='Scanning…';
+        document.getElementById('overlay').style.display='flex';
+      })
+      .catch(e=>{
+        console.error('scanner.start error',e);
+        const msg=(e&&(e.message||e.toString()))||'unknown error';
+        setStatus('Scanner failed: '+msg,'err');
+        document.getElementById('helpCard').style.display='block';
+        resetAllowBtn();
+      });
+  }).catch(e=>{
+    console.error('getCameras error',e);
+    setStatus('Cannot list cameras. Click the lock icon in the address bar and allow camera.','err');
+    document.getElementById('helpCard').style.display='block';
+    resetAllowBtn();
+  });
+}
+
+function resetAllowBtn(){
+  document.getElementById('allowCamBtn').disabled=false;
+  document.getElementById('allowCamTxt').textContent='Allow Camera & Start Scanning';
+  document.getElementById('overlay').style.display='none';
+}
+
+function onScanSuccess(text){
+  if(scanned)return;
+  scanned=true;
+  setStatus('QR detected! Decrypting…','info');
+  if(scanner && cameraRunning){
+    scanner.stop().then(()=>{
+      cameraRunning=false;
+      resetAllowBtn();
+    }).catch(()=>{cameraRunning=false;resetAllowBtn();});
+  }
+  processScannedText(text);
+}
+
+function handleFileUpload(event){
+  document.getElementById('helpCard').style.display='none';
+  const file=event.target.files[0];
+  if(!file)return;
+  setStatus('Reading QR from image…','warn');
+
+  if(scanner && cameraRunning){
+    scanner.stop().catch(()=>{});
+    cameraRunning=false;
+    resetAllowBtn();
+  }
+  const fileScanner=new Html5Qrcode('reader');
+  fileScanner.scanFile(file, true)
+    .then(decodedText=>{
+      setStatus('QR found in image. Decrypting…','info');
+      processScannedText(decodedText);
+    })
+    .catch(()=>{
+      setStatus('No QR code found in that image. Try another.','err');
+      toast('No QR code found in the image','err');
+    })
+    .finally(()=>{ event.target.value=''; });
+}
+
+function processScannedText(text){
+  try{
+    const bytes=CryptoJS.AES.decrypt(text,ENC_KEY);
+    const data=JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    if(!data.dlNumber) throw new Error('Missing required fields');
+    showResult(data);
+    saveScanHistory(data);
+  }catch(e){
+    setStatus('This QR code is not from QR Nexus, or has been tampered with.','err');
+    scanned=false;
+    toast('Invalid QR code — must be a QR Nexus QR','err');
+  }
+}
+
+function showResult(d){
+  lastScannedData=d;
+  const email=d.userEmail||d.userId||'Unknown user';
+  const displayName=(d.userEmail||'').split('@')[0] || 'User';
+  const initial=displayName.charAt(0).toUpperCase() || '?';
+  document.getElementById('r-avatar').textContent=initial;
+  document.getElementById('r-userName').textContent=displayName;
+  document.getElementById('r-userEmail').textContent=email;
+
+  if(d.userId){
+    db.ref('users/'+d.userId).once('value').then(snap=>{
+      const ud=snap.val();
+      if(ud && ud.email){
+        document.getElementById('r-userName').textContent=(ud.email.split('@')[0]);
+        document.getElementById('r-userEmail').textContent=ud.email;
+        document.getElementById('r-avatar').textContent=ud.email.charAt(0).toUpperCase();
+      }
+    }).catch(()=>{});
+  }
+
+  document.getElementById('r-dl').textContent=d.dlNumber||'-';
+  document.getElementById('r-rc').textContent=d.rcNumber||'-';
+  document.getElementById('r-pollution').textContent=d.pollutionNumber||'-';
+  document.getElementById('r-phone').textContent=d.phoneNumber||'-';
+  document.getElementById('r-time').textContent=new Date().toLocaleString();
+
+  if(d.lat!=null && d.lng!=null){
+    const ago=Math.round((Date.now()-(d.lastLocationAt||0))/60000);
+    const agoTxt=ago<1?'just now':ago<60?ago+' min ago':Math.round(ago/60)+' hr ago';
+    document.getElementById('r-citizenLoc').innerHTML=
+      '📍 '+d.lat.toFixed(5)+', '+d.lng.toFixed(5)
+      +' <a href="https://www.google.com/maps?q='+d.lat+','+d.lng+'" target="_blank" style="color:var(--neon-cyan);font-size:0.78rem;margin-left:4px;">(map)</a>'
+      +' <span style="color:var(--console-mute);font-size:0.75rem;">· '+agoTxt+'</span>';
+  }else{
+    document.getElementById('r-citizenLoc').textContent='Not shared (citizen denied location)';
+  }
+
+  getGPS().then(g=>{
+    if(g){
+      document.getElementById('r-officerLoc').innerHTML=
+        '📍 '+g.lat.toFixed(5)+', '+g.lng.toFixed(5)
+        +' <a href="https://www.google.com/maps?q='+g.lat+','+g.lng+'" target="_blank" style="color:var(--neon-cyan);font-size:0.78rem;margin-left:4px;">(map)</a>';
+    }else{
+      document.getElementById('r-officerLoc').textContent='Location not available';
+    }
+  });
+
+  if(d.fileUrl && /^https?:\/\//i.test(d.fileUrl)){
+    const docImg=document.getElementById('r-doc');
+    const docLink=document.getElementById('r-doc-link');
+    docImg.src=d.fileUrl;
+    docLink.href=d.fileUrl;
+    document.getElementById('docSection').style.display='block';
+  }else{
+    document.getElementById('docSection').style.display='none';
+  }
+
+  document.getElementById('resultCard').style.display='block';
+  setStatus('Scan complete. See details below.','ok');
+  toast('Document verified: '+(d.rcNumber||d.userEmail),'ok');
+}
+
+function saveScanHistory(data){
+  if(!currentOfficer)return;
+  const userUid=data.userId || 'unknown';
+  const scanId=Date.now().toString(36);
+
+  getGPS().then(officerGps=>{
+    const officerLat=officerGps?officerGps.lat:null;
+    const officerLng=officerGps?officerGps.lng:null;
+
+    const entry={
+      dlNumber:data.dlNumber,
+      rcNumber:data.rcNumber,
+      pollutionNumber:data.pollutionNumber,
+      phoneNumber:data.phoneNumber,
+      fileUrl:data.fileUrl||null,
+      userEmail:data.userEmail||null,
+      userUid:userUid,
+      citizenLat:data.lat||null,
+      citizenLng:data.lng||null,
+      citizenLocationAt:data.lastLocationAt||null,
+      officerLat:officerLat,
+      officerLng:officerLng,
+      scannedAt:Date.now(),
+      scannedBy:currentOfficer.email,
+      scannedByStation:currentOfficerStation||null,
+      scannedAtReadable:new Date().toLocaleString()
+    };
+    db.ref('scanHistory/'+currentOfficer.uid+'/'+userUid+'/'+scanId).set(entry).catch(e=>console.warn('History save failed:',e.message));
+
+    if(officerLat!=null && data.lat!=null){
+      const dist=haversineKm(data.lat,data.lng,officerLat,officerLng);
+      const ageMs=Date.now()-(data.lastLocationAt||0);
+      const ageHours=ageMs/3600000;
+      const speedKmh=ageHours>0?dist/ageHours:0;
+      db.ref('scanHistory/'+currentOfficer.uid+'/'+userUid+'/'+scanId).update({
+        distanceKm:Math.round(dist*10)/10,
+        impliedSpeedKmh:Math.round(speedKmh)
+      }).catch(()=>{});
+      if(dist>0 && speedKmh>100){
+        console.warn('High implied speed detected:',speedKmh,'km/h');
+      }
+    }
+  });
+}
+
+function getGPS(){
+  return new Promise((resolve)=>{
+    if(!navigator.geolocation){ resolve(null); return; }
+    const t=setTimeout(()=>resolve(null),3000);
+    navigator.geolocation.getCurrentPosition(
+      p=>{ clearTimeout(t); resolve({lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy}); },
+      ()=>{ clearTimeout(t); resolve(null); },
+      {enableHighAccuracy:false,timeout:2500,maximumAge:30000}
+    );
+  });
+}
+
+function haversineKm(lat1,lng1,lat2,lng2){
+  const R=6371;
+  const toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function scanAgain(){
+  document.getElementById('resultCard').style.display='none';
+  scanned=false;
+  lastScannedData=null;
+  setStatus('Ready. Click "Allow Camera" or upload a QR image.','info');
+  resetAllowBtn();
+}
+
+function flagCurrentUser(){
+  if(!lastScannedData||!currentOfficer)return;
+  const reason=prompt('Reason for flagging '+lastScannedData.userEmail+':\n1. Document mismatch\n2. Suspicious behavior\n3. Stolen vehicle suspected\n4. Other\n\nEnter reason:','Suspicious behavior');
+  if(!reason)return;
+  db.ref('watchlist/'+currentOfficer.uid+'/'+lastScannedData.userId).set({
+    userUid:lastScannedData.userId,
+    userEmail:lastScannedData.userEmail,
+    reason:reason,
+    notes:'',
+    flaggedBy:currentOfficer.email,
+    flaggedAt:Date.now(),
+    flaggedAtReadable:new Date().toLocaleString()
+  }).then(()=>toast(lastScannedData.userEmail+' added to watchlist','ok'));
+}
+</script>
+</body>
+</html>
