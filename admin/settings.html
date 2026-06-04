@@ -102,7 +102,7 @@ const firebaseConfig={apiKey:"AIzaSyDV_t61dDGMPNAxq9cNqeI-_s97Sxl6TdA",authDomai
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.database();
-const adminEmails=["chintuvenkatreddy13@gmail.com","gcharanyadav23@gmail.com"];
+const adminEmails=["admin@gmail.com","admin@gmail.com"];
 
 auth.onAuthStateChanged(user=>{
   if(!user||!user.emailVerified){window.location.href='../index.html';return;}

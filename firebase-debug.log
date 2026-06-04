@@ -7,7 +7,7 @@
 [debug] [2026-06-04T10:21:33.012Z] ----------------------------------------------------------------------
 [debug] 
 [debug] [2026-06-04T10:21:34.690Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2026-06-04T10:21:34.690Z] > authorizing via signed-in user (gcharanyadav23@gmail.com)
+[debug] [2026-06-04T10:21:34.690Z] > authorizing via signed-in user (admin@gmail.com)
 [debug] [2026-06-04T10:21:34.690Z] [iam] checking project qr-nexus-81938 for permissions ["firebase.projects.get"]
 [debug] [2026-06-04T10:21:34.691Z] Checked if tokens are valid: true, expires at: 1780569714541
 [debug] [2026-06-04T10:21:34.691Z] Checked if tokens are valid: true, expires at: 1780569714541

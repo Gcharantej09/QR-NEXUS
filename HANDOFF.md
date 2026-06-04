@@ -15,8 +15,8 @@
 
 ## Admin Emails
 Hard-coded in the `adminEmails` array in every page:
-- `chintuvenkatreddy13@gmail.com`
-- `gcharanyadav23@gmail.com`
+- `admin@gmail.com`
+- `admin@gmail.com`
 
 ## AES Encryption Key
 `66MXNJUNXTH` - used to encrypt/decrypt QR data (must match between generator and scanner)

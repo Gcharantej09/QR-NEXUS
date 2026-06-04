@@ -40,8 +40,8 @@ user/                      <- Citizen pages
 
 The following two emails are treated as officers (set in code, in the `adminEmails` array in every page):
 
-- `chintuvenkatreddy13@gmail.com`
-- `gcharanyadav23@gmail.com`
+- `admin@gmail.com`
+- `admin@gmail.com`
 
 To add a new admin, add the email to the `adminEmails` array in **every** HTML file (or refactor to a shared config file — see TODOs).
 
